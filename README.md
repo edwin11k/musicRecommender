@@ -10,3 +10,9 @@ Steps:
 (3) The user will provide the reponse on the new sample, this will keep update the result
 
 
+Dependancies
+
+1. pydub https://github.com/jiaaro/pydub
+2. pyAudioAnalysis https://github.com/tyiannak/pyAudioAnalysis
+
+and many others...
