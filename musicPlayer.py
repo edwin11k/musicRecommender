@@ -16,9 +16,11 @@ class MusicPlayer(MusicHandler):
     # Plays the music located at the index given & then obtains boolean input for likability
     def musicPlay(self,fileIndex):
         print('Music Playing Initiated!')
+        MusicHandler.newFactory.musicFiles.printMusicInfo(fileIndex)
         play(AudioSegment.from_file(self.newFactory.musicFiles.filePath[fileIndex]))
+        
         while True:
-            answer=input('Do you like the music?[Y|N]')
+            answer=input('Do you like the music(Yes|No|Abstain)?[Y|N|A]')
             print()
             if answer=='Y':
                 MusicHandler.posMusic.append(fileIndex)
@@ -26,9 +28,8 @@ class MusicPlayer(MusicHandler):
             if answer=='N':
                 MusicHandler.negMusic.append(fileIndex)
                 return False
-            print ('Wrong input: Answer must be N or Y')
+            if answer=='A':
+                MusicHandler.absMusic.append(fileIndex)
+                return None
+            print ('Wrong input: Answer must be N,Y,or A')
         
-    
-
-    
-#new=MusicPlayer();print(new.musicPlay(2))
