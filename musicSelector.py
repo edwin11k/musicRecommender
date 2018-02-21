@@ -19,10 +19,12 @@ class MusicSelector(MusicHandler):
             fileIndex.remove(mem)
         for mem in MusicHandler.negMusic:
             fileIndex.remove(mem)
+        for mem in MusicHandler.absMusic:
+            fileIndex.remove(mem)
         return random.choice(fileIndex)
         
     def mostFavSelect(self):
-        maxIndex=-100;maxValue=-0.1;
+        maxIndex=-1000000;maxValue=-0.1;
         print('Selecting Your Favorite Music!')
         #print(MusicHandler.results)
         #print(MusicHandler.posMusic)
