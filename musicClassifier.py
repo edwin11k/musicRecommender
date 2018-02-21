@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
 Created on Fri Feb 16 16:09:49 2018
 
 @author: edwin
@@ -17,33 +15,51 @@ class MusicClassifier(MusicHandler):
     def binaryClassifier(self):
         #self.posMusic=[4];self.negMusic=[1,2]
         posFeature=[];negFeature=[];features=[]
-        
-        if self.MLAlgorithm=='SVM_RBF':
-            print('SVM RBF Classifier')
-            if MusicHandler.posMusic:
-                for pIndex in MusicHandler.posMusic:
-                    posFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])
-            if MusicHandler.negMusic:
-                for nIndex in MusicHandler.negMusic:
-                    negFeature.append(self.newFactory.musicFiles.stFeatures[nIndex])
+        if MusicHandler.posMusic:
+            for pIndex in MusicHandler.posMusic:
+                posFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])
+        if MusicHandler.negMusic:
+            for nIndex in MusicHandler.negMusic:
+                negFeature.append(self.newFactory.musicFiles.stFeatures[nIndex])
         
         features.append(posFeature);features.append(negFeature)
         features=featureStack(features)
         #print(features[0].shape,features[1].shape)
-        self.model=trainSVM_RBF(features,0.1)
+                    
+        if self.MLAlgorithm=='SVM_RBF':
+            print('SVM RBF Classifier')
+            self.model=trainSVM_RBF(features,0.1)
         
+        if self.MLAlgorithm=='SVM':
+            print('SVM Linear Classifier')
+            self.model=trainSVM(features,0.1)
+            
+        if self.MLAlgorithm=='RandomForest':
+            print('Random Forest Classifier')
+            self.model=trainRandomForest(features,100)
         
+        if self.MLAlgorithm=='GradientBoosting':
+            print('Gradient Boosting Classifier')
+            self.model=trainGradientBoosting(features,100)
+        
+        if self.MLAlgorithm=='ExtraTrees':
+            print('Extra Trees Classifier')
+            self.model=trainExtraTrees(features,100)
+            
+            
     def testClassifier(self):
         trainTypes=['Like','Not Like'];
         features=self.newFactory.musicFiles.stFeatures
         featureList=list(range(len(self.newFactory.musicFiles.fileName)))
-        print(featureList,self.posMusic,self.negMusic)
-        for mem in self.posMusic:
+        #print(featureList,self.posMusic,self.negMusic)
+        for mem in MusicHandler.posMusic:
             featureList.remove(mem)
-        for mem in self.negMusic:
+        for mem in MusicHandler.negMusic:
             featureList.remove(mem)
-        print(featureList,self.posMusic,self.negMusic)
-        print(MusicHandler.results)
+        for mem in MusicHandler.absMusic:
+            featureList.remove(mem)
+        print(featureList,MusicHandler.posMusic,MusicHandler.negMusic,MusicHandler.absMusic)
+        #print(MusicHandler.results)
         MusicHandler.results=[]
         for i,feature in enumerate(features):
             if i in featureList:
@@ -55,7 +71,7 @@ class MusicClassifier(MusicHandler):
         
     
 
-#A=MusicClassifier();A.binaryClassifier();A.testClassifier()
+
 
 
 
