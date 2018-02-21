@@ -66,5 +66,12 @@ class Music(object):
         return 'Music Type:'+self.genre
                             
     
+    def printMusicInfo(self,index):
+        print()
+        print('----Music Information--------------------')
+        print('File # '+str(index+1))
+        print('Title: ',self.fileInfo[index][0])
+        print('Duration:',str(int(self.fileInfo[index][4]))+' sec')
+        print('-----------Enjoy The Music --------------')
     
     
