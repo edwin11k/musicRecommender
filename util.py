@@ -48,13 +48,3 @@ def viewResults(results):
         print (mem)
         
         
-def multiSVM(listMusic,listDir,window,step,RBF):
-    features=featureStack(loadMusicFeatures(listMusic,listDir,window,step))
-    print()
-    print('SVM Model Fitting Initiated! This may take a while~')
-    if RBF:
-        svm=trainSVM_RBF(features,0.1)
-    else:
-        svm=trainSVM(features,0.1)
-    print('SVM Training Completed!')
-    return svm
