@@ -13,26 +13,26 @@ from musicSelector import *
 
 def musicRecommender():
     print()
-    print("Music Simulator: Based on your response, it finds likely favorites")
+    print("Music Simulator: Based On Response, It Will Find Your Favorites")
     print()
     
     selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()
     
     while True:
         print('Finding Random Choice of Music!')
+        print()
         newValue=selector.randomSelect()
         player.musicPlay(newValue)
         
-        if len(selector.posMusic)>0 and len(selector.negMusic)>0:
-            print('Making Model based on Past answer!')
+        if len(selector.posMusic)>0 and len(selector.negMusic)>0:           
             break
     
     while True:
+        print('Making Model based on Past answer!')
         classifier.binaryClassifier();classifier.testClassifier();
-        classifier.emptyResults()
         newMusicIndex=selector.mostFavSelect()
         #print(newMusicIndex)
-        if newMusicIndex==-100:
+        if newMusicIndex==-1000000:
             print('Music Data has run out!')
             break
         else:
