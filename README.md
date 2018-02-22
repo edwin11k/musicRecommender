@@ -26,3 +26,11 @@ The algorithm works as following:
 3. Once the algorithm has at least one positive and one negative, it models using the algorithm of choice such as SVM, Gradient Boosting, Random Forest, Extra Trees.
 4. The algorithm scans the rest of music file and select the one that has most positive slice components.
 5--> 2 with additional data
+
+Updated To Add New Features:
+
+1. Give a choice to abstain on a music sample
+2. Music Samples are shortened to 1 min (which may be changed in the code)
+3. Give users to stop the program 
+4. Display the history of the choices made on each music
+5. Music files are saved to a file: If a file exists, the program loads the file. If not, read the music file and save it for later.
