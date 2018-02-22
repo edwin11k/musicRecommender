@@ -19,25 +19,35 @@ def musicRecommender():
     selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()
     
     while True:
-        print('Finding Random Choice of Music!')
         print()
+        print('Finding Random Choice of Music!')
         newValue=selector.randomSelect()
+        if newValue==-10000:
+            print()
+            print('Music Data Has Run Out!')
+            player.displayHistory()
+            return
         player.musicPlay(newValue)
-        
         if len(selector.posMusic)>0 and len(selector.negMusic)>0:           
             break
     
     while True:
+        if player.musicStop():
+            print()
+            print('Thank You For Using The System!')
+            player.displayHistory()
+            return
+        
         print('Making Model based on Past answer!')
         classifier.binaryClassifier();classifier.testClassifier();
         newMusicIndex=selector.mostFavSelect()
-        #print(newMusicIndex)
-        if newMusicIndex==-1000000:
+        if newMusicIndex==-10000:
             print('Music Data has run out!')
             break
         else:
             player.musicPlay(newMusicIndex)
-        
+      
+    player.displayHistory()
     
 musicRecommender()
 
