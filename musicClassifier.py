@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+"""
 Created on Fri Feb 16 16:09:49 2018
 
 @author: edwin
@@ -70,9 +72,4 @@ class MusicClassifier(MusicHandler):
         viewResults(MusicHandler.results)
         
     
-
-
-
-
-
 
