@@ -9,11 +9,14 @@ Created on Fri Feb 16 11:18:49 2018
 from musicHandler import *
 from pydub import AudioSegment
 from pydub.playback import play
+from musicUser import *
 
 
 class MusicPlayer(MusicHandler):
     
     # Plays the music located at the index given & then obtains boolean input for likability
+    user=MusicUser();
+    
     def musicPlay(self,fileIndex):
         print()
         print('Music Playing Initiated!')
@@ -35,9 +38,38 @@ class MusicPlayer(MusicHandler):
                 break
             print ('Wrong Input: Answer Must Be N,Y,or A')
         
+        
         MusicHandler.history[MusicHandler.newFactory.musicFiles.fileName[fileIndex]]=response
         #print(MusicHandler.history)
         
+
+    def musicPlaySimuAnswer(self,modelDir,fileIndex):
+        print()
+        print('Music Playing Initiated!')
+        MusicHandler.newFactory.musicFiles.printMusicInfo(fileIndex)
+        song=AudioSegment.from_file(self.newFactory.musicFiles.filePath[fileIndex])
+        play(song[:1000*60])
+        response=''
+        while True:
+            print('Do you like the music(Yes|No|Abstain)?[Y|N|A]')         
+            #answer=self.user.randomAnswer()
+            answer=self.user.prevModelAnswer(fileIndex,modelDir)
+            print('Your Answer is ',answer)
+            
+            if answer=='Y':
+                MusicHandler.posMusic.append(fileIndex);response='YES'
+                break
+            if answer=='N':
+                MusicHandler.negMusic.append(fileIndex);response='NO'
+                break
+            if answer=='A':
+                MusicHandler.absMusic.append(fileIndex);response='ABSTAIN'
+                break
+            print ('Wrong Input: Answer Must Be N,Y,or A')
+        
+        
+        MusicHandler.history[MusicHandler.newFactory.musicFiles.fileName[fileIndex]]=response
+        #print(MusicHandler.history)        
 
         
     def musicStop(self):        
@@ -49,6 +81,16 @@ class MusicPlayer(MusicHandler):
                 return True
             print ('Wrong Input: Answer Must Be N or Y')        
         
+    def musicStopSimuAnswer(self):        
+        while True:
+            print('Do You Want To Listen To The Next Song(Yes|No)?[Y|N]')
+            cAnswer=self.user.musicStopAnswer()
+            if cAnswer=='Y':
+                return False
+            if cAnswer=='N':
+                return True
+            print ('Wrong Input: Answer Must Be N or Y')     
+            
     def displayHistory(self):
         totalNumber=len(MusicHandler.posMusic)+len(MusicHandler.negMusic)+len(MusicHandler.absMusic)
         print()
