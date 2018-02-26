@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Feb 16 11:18:49 2018
-
 @author: edwin
 """
 
 from musicFactory import *
 
-defaultDir='C:/Users/edwin/Documents/music/musicSimulator/musicFile/Test2'
+defaultDir1='C:/Users/edwin/Documents/music/musicSimulator/musicFile/Test'
 genre='Test'
 window=0.4;step=0.4
 
 class MusicHandler(object):
+    defaultDir=defaultDir1;
     newFactory=MusicFactory()  
     newFactory.loadMusic(genre,defaultDir,window,step);newFactory.saveMusicInfo()
     #Saving index of the musicfile that received either positive or negative result
