@@ -9,12 +9,13 @@ from musicHandler import *
 from pyAudioAnalysis.audioTrainTest import *
 from pyAudioAnalysis.audioFeatureExtraction import *
 from util import *
-import _pickle
+import pickle
+import os
 
 class MusicClassifier(MusicHandler):
     window=0.4; step=0.4;MLAlgorithm="SVM_RBF"
     # SVM Classifier for files in posMusic & negMusic
-    def binaryClassifier(self):
+    def binaryClassifier(self,save=False):
         #self.posMusic=[4];self.negMusic=[1,2]
         posFeature=[];negFeature=[];features=[]
         if MusicHandler.posMusic:
@@ -48,6 +49,15 @@ class MusicClassifier(MusicHandler):
             print('Extra Trees Classifier')
             self.model=trainExtraTrees(features,100)
             
+        if save:
+            print('Model is being saved! This may take a while!')
+            modelString=MusicHandler.defaultDir+os.sep+self.MLAlgorithm+'_Model';
+            with open(modelString, 'wb') as fid:
+                pickle.dump(self.model,fid)
+            print(self.MLAlgorithm+' Model Has been Saved') 
+        
+        
+
             
     def testClassifier(self):
         trainTypes=['Like','Not Like'];
@@ -70,6 +80,3 @@ class MusicClassifier(MusicHandler):
                     predict[int(self.model.predict(feature[:,j].reshape(1,-1)))]+=1
                 MusicHandler.results.append((i,self.newFactory.musicFiles.fileName[i],predict,predict[0]/(predict[0]+predict[1]),trainTypes[argmax(predict)]))
         viewResults(MusicHandler.results)
-        
-    
-
