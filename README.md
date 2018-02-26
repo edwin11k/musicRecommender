@@ -27,10 +27,15 @@ The algorithm works as following:
 4. The algorithm scans the rest of music file and select the one that has most positive slice components.
 5--> 2 with additional data
 
-Updated To Add New Features:
+1st Updated To Add New Features:
 
 1. Give a choice to abstain on a music sample
 2. Music Samples are shortened to 1 min (which may be changed in the code)
 3. Give users to stop the program 
 4. Display the history of the choices made on each music
 5. Music files are saved to a file: If a file exists, the program loads the file. If not, read the music file and save it for later.
+
+2nd Update 
+
+1. Adding simulator that produces human like response to the system. MusicUser class has two functions (1) Random response to the music with (Y/N/A) 0.333 probability. Or (2) Load previous classifier to make the decision of the music.  In second case, the model must exist and directory must be specified. Currently, the model name must be 'SVM_RBF_Model'. 
+
