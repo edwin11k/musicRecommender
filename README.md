@@ -14,7 +14,7 @@ Dependancies
 
 1. pydub https://github.com/jiaaro/pydub
 2. pyAudioAnalysis https://github.com/tyiannak/pyAudioAnalysis
-3. ffmpg http://www.ffmpeg.org if you need to run non .wav files such as mp3
+3. ffmpg http://www.ffmpeg.org if you need to run files other than wav such as mp3
 
 and many others...
 
