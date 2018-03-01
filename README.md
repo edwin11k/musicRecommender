@@ -14,6 +14,7 @@ Dependancies
 
 1. pydub https://github.com/jiaaro/pydub
 2. pyAudioAnalysis https://github.com/tyiannak/pyAudioAnalysis
+3. ffmpg http://www.ffmpeg.org if you need to run non .wav files such as mp3
 
 and many others...
 
@@ -25,7 +26,8 @@ The algorithm works as following:
 2. The user's choice will label all the segments as positive or negative (abstain will result in simply discarding)
 3. Once the algorithm has at least one positive and one negative, it models using the algorithm of choice such as SVM, Gradient Boosting, Random Forest, Extra Trees.
 4. The algorithm scans the rest of music file and select the one that has most positive slice components.
-5--> 2 with additional data
+
+5. repeat -> 2 now with one more music data
 
 1st Updated To Add New Features:
 
