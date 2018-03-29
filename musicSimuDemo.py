@@ -10,7 +10,73 @@ from musicPlayer import *
 from musicSelector import *
 
 # Path where model file exists
-dir1='C:/Users/edwin/Documents/music/musicSimulator/musicFile/Test2'
+modelDir1='C:/Users/edwin/Documents/music/musicSimulator/musicFile/Test'
+modelDir2='C:/Users/edwin/Documents/music/musicSimulator/musicFile/Test2'
+
+# Path to music data files need to be set in musicHandler.py 
+alpha=0.5;
+
+
+
+
+def modelMaker():
+    print()
+    print("Play random music in the folder and Generate Machine Learning Model ")
+    print()
+    
+    selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()
+    numOfTest=10;currentNum=0;
+    while True:
+        print()
+        print('Finding Random Choice of Music!')
+        newValue=selector.randomSelect()
+        if newValue==-10000:
+            print()
+            print('Music Data Has Run Out!')
+            player.displayHistory()
+            return
+        
+        if currentNum>=numOfTest:
+            break
+        currentNum+=1;print('Current Music Count:',str(currentNum))
+        player.musicPlay(newValue)
+           
+    player.displayHistory()
+    ##Saving the music model : ex)svm_RBFModel 
+    classifier.binaryClassifier()
+    classifier.saveClassifier()
+    
+
+def modelPredictionTester():
+    print()
+    print("Compare two models for testing prediction rate ")
+    print()
+    
+    selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()
+    numOfTest=39;currentNum=0;
+#    while True:
+#        print()
+#        print('Finding Random Choice of Music!')
+#        newValue=selector.randomSelect()
+#        if newValue==-10000:
+#            print()
+#            print('Music Data Has Run Out!')
+#            player.displayHistory()
+#            return
+#        
+#        if currentNum>=numOfTest:
+#            break
+#        currentNum+=1;print('Current Music Count:',str(currentNum))
+#        player.musicPlayTwinSimuAnswer(modelDir1,modelDir2,newValue)
+           
+    for newValue in range(numOfTest):
+        currentNum+=1;print('Current Music Count:',str(currentNum))
+        player.musicPlayTwinSimuAnswer(modelDir1,modelDir2,newValue)
+    player.displayPredict()
+    ##Saving the music model : ex)svm_RBFModel 
+    #classifier.binaryClassifier()
+    #classifier.saveClassifier()
+
 
 def musicRecommender():
     print()
@@ -40,7 +106,7 @@ def musicRecommender():
             return
         
         print('Making Model based on Past answer!')
-        classifier.binaryClassifier();classifier.testClassifier();
+        classifier.binaryClassifier();classifier.testClassifier(alpha);
         newMusicIndex=selector.mostFavSelect()
         if newMusicIndex==-10000:
             print('Music Data has run out!')
@@ -50,7 +116,7 @@ def musicRecommender():
     
     player.displayHistory()
     ##Saving the music model : ex)svm_RBFModel 
-    classifier.binaryClassifier(save=True)
+    #classifier.saveClassifier()
     
     
     
@@ -84,7 +150,7 @@ def musicSimulator(modelDir):
             return
         
         print('Making Model based on Past answer!')
-        classifier.binaryClassifier();classifier.testClassifier();
+        classifier.binaryClassifier();classifier.testClassifier(alpha);
         newMusicIndex=selector.mostFavSelect()
         if newMusicIndex==-10000:
             print('Music Data has run out!')
@@ -95,8 +161,99 @@ def musicSimulator(modelDir):
     
     player.displayHistory()
     ##Saving the music model : ex)svm_RBF_Model 
-    classifier.binaryClassifier(save=True)
+    #classifier.saveClassifier()
     
-#musicRecommender()
-musicSimulator(dir1)
+    
 
+def musicRecommenderAlpha():
+    print()
+    print("Music Recommender: Recommends Music Based On Alpha Value:"+str(alpha))
+    print()
+    
+    selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()
+    
+    while True:
+        print()
+        print('Finding Random Choice of Music!')
+        newValue=selector.randomSelect()
+        if newValue==-10000:
+            print()
+            print('Music Data Has Run Out!')
+            player.displayHistory()
+            return
+        player.musicPlay(newValue)
+        if len(selector.posMusic)>0 and len(selector.negMusic)>0:           
+            break
+    
+    while True:
+        if player.musicStopSimuAnswer():
+            print()
+            print('Thank You For Using The System!')
+            player.displayHistory()
+            return
+        
+        print('Making Model based on Past answer!')
+        classifier.binaryClassifier();classifier.testClassifier(alpha)
+        newMusicIndex=selector.alphaModelSelect()
+        if newMusicIndex==-10000:
+            print('Music Data has run out!')
+            break
+        else:
+            player.musicPlay(newMusicIndex)
+    
+    player.displayHistory()
+    ##Saving the music model : ex)svm_RBFModel 
+    #classifier.saveClassifier()
+    
+
+def musicSimulatorAlpha(modelDir):
+    print()
+    print("Music Recommender: Recommends Music Based On Alpha Value:"+str(alpha))
+    print()
+    
+    selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()
+    
+    while True:
+        print()
+        print('Finding Random Choice of Music!')
+        newValue=selector.randomSelect()
+        if newValue==-10000:
+            print()
+            print('Music Data Has Run Out!')
+            player.displayHistory()
+            return
+        player.musicPlaySimuAnswer(modelDir,newValue)
+        if len(selector.posMusic)>0 and len(selector.negMusic)>0:           
+            break
+    
+    while True:
+        if player.musicStopSimuAnswer():
+            print()
+            print('Thank You For Using The System!')
+            player.displayHistory()
+            classifier.saveClassifier()
+            return
+        
+        print('Making Model based on Past answer!')
+        classifier.binaryClassifier();classifier.testClassifier(alpha);
+        newMusicIndex=selector.alphaModelSelect()
+        #newMusicIndex=selector.randomSelect()
+        if newMusicIndex==-10000:
+            print('Music Data has run out!')
+            break
+        else:
+            player.musicPlaySimuAnswer(modelDir,newMusicIndex)
+    
+    
+    player.displayHistory()
+    classifier.saveClassifier()
+    
+        
+    
+    
+#modelMaker()   
+#musicRecommender()
+#musicSimulator(modelDir1)
+#musicRecommenderAlpha()
+#musicSimulatorAlpha(modelDir1)
+modelPredictionTester()
