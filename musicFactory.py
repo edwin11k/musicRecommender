@@ -12,7 +12,7 @@ import os
 class MusicFactory(object):
      
     
-    def loadMusic(self,music_genre=None,directory=os.curdir,window1=0.4,step1=0.4):
+    def loadMusic(self,music_genre=None,directory=os.curdir,window1=0.04,step1=0.04):
         self.musicFiles=Music(dirPath=directory,music_genre=music_genre,window=window1,step=step1)
         return self.musicFiles
     
