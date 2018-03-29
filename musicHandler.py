@@ -1,23 +1,30 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Feb 16 11:18:49 2018
+
 @author: edwin
 """
 
 from musicFactory import *
 
-defaultDir1='C:/Users/edwin/Documents/music/musicSimulator/musicFile/Test'
+#This is the folder where music files are located
+defaultDir1='C:/Users/edwin/Documents/music/musicSimulator/musicFile/Test3'
 genre='Test'
-window=0.4;step=0.4
+window=0.04;step=0.04
 
 class MusicHandler(object):
     defaultDir=defaultDir1;
     newFactory=MusicFactory()  
     newFactory.loadMusic(genre,defaultDir,window,step);newFactory.saveMusicInfo()
     #Saving index of the musicfile that received either positive or negative result
-    # Class variables to be shared by all instances
-    posMusic=[];negMusic=[];absMusic=[];results=[]
+    # Static variables to be shared by all objects 
+    posMusic=[];negMusic=[];absMusic=[];
+    results=[]
+    predictRate=0
     
     #Past choices will be saved in history
     history={}
-      
+    musicCount=20
     # will be overwritten 
 
     ###player----
@@ -26,6 +33,8 @@ class MusicHandler(object):
     
     def displayHistory(self):
         pass
+    
+ 
     
     ## selector-----
     def randomSelect(self):
