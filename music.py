@@ -5,6 +5,7 @@ from pyAudioAnalysis.audioFeatureExtraction import *
 from pyAudioAnalysis.audioSegmentation import *
 from pyAudioAnalysis.audioVisualization import *
 from pyAudioAnalysis.audioTrainTest import *
+from util import *
 import os
 import pickle
 
@@ -12,13 +13,10 @@ import pickle
 
 
 class Music(object): 
-    """ Music object reading files
-    
-    Within the given directory, the class will read all the files
-    
-    """
-      
-    def __init__(self,dirPath=os.curdir,music_genre=None,window=0.4,step=0.4):
+    """ Music object reading files    
+    Within the given directory, the class will read all the files    
+    """      
+    def __init__(self,dirPath=os.curdir,music_genre=None,window=0.05,step=0.05,thumbNail=True):
         self.dirPath=dirPath
         self.genre=music_genre
         self.fileName=[]
@@ -27,6 +25,8 @@ class Music(object):
         self.stFeatures=[]
         self.fileInfo=[]
         self.filePath=[]
+        self.thumbNail=[]
+        
         print()      
         try:
             fo=open(dirPath+os.sep+'musicDataFile','rb')
@@ -37,24 +37,37 @@ class Music(object):
             self.stFeatures=pickle.load(fo)
             self.fileInfo=pickle.load(fo)
             self.filePath=pickle.load(fo)
+            self.thumbNail=pickle.load(fo)
             fo.close()
             print('Previous Music Data File Exists & Loading the File')
         except:
             print('No Music Data File Exists, Begin Reading!')
-            for file in os.listdir(dirPath):
-                [fs,x]=readAudioFile(dirPath+os.sep+file);x=stereo2mono(x)   
+            
             ## pydub seems to have already adjusted the frequency sampling for multi channel, hence commented out
 #            # If the signal is multichannel, reduce it down to mono for analysis
 #            channel=x.shape[1]
 #            if x.ndim>1:
 #                x=stereo2mono(x);fs=int(fs/channel)
+            
+            for file in os.listdir(dirPath):
+                [fs,x]=readAudioFile(dirPath+os.sep+file);x=stereo2mono(x);
+                if thumbNail:
+                    B=thumbNailProcess(dirPath+os.sep+file);
+                    #print(fs,fs*B,fs*E)  
+                    E=B+20
+                else:
+                    #print(fs,B,E)
+                    B=0;E=B+20
+                x=x[int(fs*B):int(fs*E)]
+            
+                    
                 if music_genre=='Speech':
                     print(music_genre+" File Read Located At :"+dirPath+os.sep+file)
                 else:
                     print(music_genre+" Music File Read Located At :"+dirPath+os.sep+file)
                 
-                x=x[:fs*60]
-                
+                self.thumbNail.append((B,E))
+        
                 self.fileData.append(x);self.Fs.append(fs)
                 self.stFeatures.append(stFeatureExtraction(x,fs,window*fs,step*fs)) 
                 self.fileName.append(file)
@@ -104,6 +117,7 @@ class Music(object):
             pickle.dump(self.stFeatures,fo,protocol=pickle.HIGHEST_PROTOCOL)
             pickle.dump(self.fileInfo,fo,protocol=pickle.HIGHEST_PROTOCOL)
             pickle.dump(self.filePath,fo,protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.thumbNail,fo,protocol=pickle.HIGHEST_PROTOCOL)
             fo.close()
             print('New Music Data File Has Been Saved!')
             
