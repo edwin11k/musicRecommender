@@ -1,50 +1,59 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Feb 13 19:15:19 2018
+Created on Sun Feb 25 12:36:32 2018
 
 @author: edwin
 """
+
 from musicHandler import *
-import numpy as np
-import logging
+import random 
+import os
+import pickle
 
 
+
+class MusicUser(MusicHandler):
+    print("Simulated User Experience!")
     
-
-def loadMusicFeatures(listMusic,listDir,window,windowStep):
-    musicFeatures=[]
-    newFactory=musicFactory()
-    for i, mem in enumerate(listMusic):
-        if window[i]==None and windowStep[i]==None:
-            Music=newFactory.loadMusic(mem,listDir[i])
+    def randomAnswer(self):
+        randomNum=random.randint(-1,1);
+        if randomNum==-1:
+            return "N";
+        elif randomNum==1:
+            return "Y";
         else:
-            logging.warning('New Step And Window Size Assigned!')
-            Music=newFactory.loadMusic(mem,listDir[i],window[i],windowStep[i])
-        musicFeatures.append(Music.stFeatures)   
-    print('Music Features are loaded')
-    return musicFeatures
-
-
-
-def displayMusicInfo(musicType,listDir,window,windowStep):
-    for i,dir1 in enumerate(listDir):
-        newFactory=musicFactory();newFactory.loadMusic(music_genre=musicType[i],directory=dir1,window1=window[i],step1=windowStep[i])
-        #newFactory.printMusicFileInfo()
+            return "A"
+        
+    def prevModelAnswer(self,fileNum,modelDir,MLAlgorithm='SVM_RBF'):
+        #loading the pre-existing model
+        fileName=modelDir+os.sep+MLAlgorithm+'_Model'
+        with open(fileName,'rb') as fid:
+            model=pickle.load(fid)
+        feature=self.newFactory.musicFiles.stFeatures[fileNum]
+        predict=[0,0]
+        for j in range(len(feature[1])):
+            predict[int(model.predict(feature[:,j].reshape(1,-1)))]+=1
+        print(predict)
+        total=predict[0]+predict[1];
+        ### IF user likes more than 60% segments, give positive response
+        if predict[0]/total>0.66:
+            return "Y"
+        ### negative reponse if like less than 40%
+        elif predict[0]/total<0.33:
+            return "N"
+        ### abstain between 40~60
+        else:
+            return "A"
+       
+    
+    def musicStopAnswer(self):
+        
+        if MusicHandler.musicCount>0:
+            MusicHandler.musicCount-=1
+            print('Music Count Remaining:'+str(MusicHandler.musicCount))
+            return 'Y'
+        else:
+            return 'N'
+        
     
     
-
-# Stack the features from various sources in the genre, & Transpose is needed to use list of features
-def featureStack(features):
-    matrixFeatures=[]
-    for feat in features:
-        matrixFeatures.append((np.hstack(feat)).T)
-    #[matrixFeatures, MEAN, STD] = normalizeFeatures(matrixFeatures)
-    return matrixFeatures
-
-
-
-def viewResults(results):
-    for mem in results:
-        print (mem)
-        
-        
