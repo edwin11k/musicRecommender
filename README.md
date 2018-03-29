@@ -41,3 +41,7 @@ The algorithm works as following:
 
 1. Adding simulator that produces human like response to the system. MusicUser class has two functions (1) Random response to the music with (Y/N/A) 0.333 probability. Or (2) Load previous classifier to make the decision of the music.  In second case, the model must exist and directory must be specified. Currently, the model name must be 'SVM_RBF_Model'. 
 
+3rd Update : March 29 2018
+
+1. Added Thumbnail function
+2. Predictive Modelling 
