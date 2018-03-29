@@ -35,7 +35,7 @@ class MusicSelector(MusicHandler):
     def mostFavSelect(self):
         maxIndex=-10000;maxValue=-0.1;
         print()
-        print('Selecting Your Favorite Music!')
+        print('Selecting Your Most Favorite Music!')
         #print(MusicHandler.results)
         #print(MusicHandler.posMusic)
         #print(MusicHandler.negMusic)
@@ -43,9 +43,18 @@ class MusicSelector(MusicHandler):
             #print(mem)
             if mem[3]>maxValue:
                 maxValue=mem[3];maxIndex=mem[0]
-                #print('new favorite!')
-            #print(maxValue,maxIndex)
         return maxIndex
         
         
-        
+    """ 
+    Semi Unifying & Recommendation Model: 
+    Reference to Yang et al. "Unifying recommendation and active learning for human-algorithm interaction" 
+    equation (3)
+    """
+    
+    def alphaModelSelect(self):
+        minValue=100;minIndex=-1;
+        for mem in MusicHandler.results:
+            if mem[4]<minValue:
+                minValue=mem[4];minIndex=mem[0];
+        return minIndex
