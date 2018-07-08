@@ -60,6 +60,40 @@ def thumbNailProcess(inputFile,musicDuration=20):
     return A1
         
 
+#find the peak of cross-correlation between two music features
+import scipy as sp
+def xorrFeatureMax(feature1,feature2,window,step=1):
+    size1=len(feature1);size2=len(feature2);
+    maxValue=0;
+    if window>size1 or window>size2:
+        print('Window size is too large')
+        return 0
+    for i in range(0,size1-window,step):
+        for j in range(0,size2-window,step):
+            xorrValue=sp.correlate(feature1[i:(i+window)],feature2[i:(i+window)])
+            if xorrValue>maxValue:
+                maxValue=xorrValue
+    return maxValue
+
+import math
+def xorrFeatureVec(feature1,feature2,window,step,begin,end):
+    distanceVec=[]
+    sumDistance=0
+    numOfFeature=len(feature1)
+    for i in range(begin,end):
+        featureDist=xorrFeatureMax(feature1[i],feature2[i],window,step)
+        distanceVec.append(featureDist)
+        sumDistance+=featureDist*featureDist
+    return distanceVec,math.sqrt(sumDistance)
+        
+    
+## seem to be already normalized.
+def featureWhitten(feature):
+    numOfFeature=len(feature)
+    newFeature=[]
+    for i in range(numOfFeature):
+        newFeature.append((feature[i]-mean(feature[i]))/std(feature[i]))
+    return newFeature
     
     
     
