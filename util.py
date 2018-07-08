@@ -59,7 +59,6 @@ def thumbNailProcess(inputFile,musicDuration=20):
     
     return A1
         
-
 #find the peak of cross-correlation between two music features
 import scipy as sp
 def xorrFeatureMax(feature1,feature2,window,step=1):
@@ -94,6 +93,5 @@ def featureWhitten(feature):
     for i in range(numOfFeature):
         newFeature.append((feature[i]-mean(feature[i]))/std(feature[i]))
     return newFeature
-    
     
     
