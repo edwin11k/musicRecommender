@@ -12,18 +12,92 @@ from util import *
 import pickle
 import os
 
+## If set true, use a single mean data of features in 34 dimension instead of 500 data points.
+useMean=True;
 class MusicClassifier(MusicHandler):
     MLAlgorithm="SVM_RBF"
     # SVM Classifier for files in posMusic & negMusic
+    
+    
+    def computeMeanFeatureXorrSum(self):
+        ## save the xorr values with already tested music files
+        # Empty previous information
+        MusicHandler.xorrValueDic={}
+        ## Remove music files already tested
+        size=len(self.newFactory.musicFiles.fileData)
+        fileIndex=list(range(size))
+        for mem in MusicHandler.posMusic:
+            fileIndex.remove(mem)
+        for mem in MusicHandler.negMusic:
+            fileIndex.remove(mem)
+        for mem in MusicHandler.absMusic:
+            fileIndex.remove(mem)
+        
+        bFeature=0;eFeature=34
+        #tempolar 0-7, MFCC 8-20,chroma 21-32(chroma STD: 33)
+        #If all features are included without normalization, MFCC often dominates
+        for musicNum in fileIndex:
+            xorrValue=0;
+            ## Using average features, next 34 are standard deviation
+            meanFeature=self.newFactory.musicFiles.mtFeatures[musicNum][bFeature:eFeature]
+           
+            for mem in MusicHandler.posMusic: 
+                xorrValue+=simpleFeatureDis(meanFeature,self.newFactory.musicFiles.mtFeatures[mem][bFeature:eFeature],0,33)
+            for mem in MusicHandler.negMusic:   
+                xorrValue-=simpleFeatureDis(meanFeature,self.newFactory.musicFiles.mtFeatures[mem][bFeature:eFeature],0,33)
+            MusicHandler.xorrValueDic[musicNum]=xorrValue
+        print(MusicHandler.xorrValueDic)
+        
+        
+    ##find data that are far from already labeled independant of the labels
+    def computeMeanFeatureAbsXorrSum(self):
+        ## save the xorr values with already tested music files
+        # Empty previous information
+        MusicHandler.xorrAbsValueDic={}
+        ## Remove music files already tested
+        size=len(self.newFactory.musicFiles.fileData)
+        fileIndex=list(range(size))
+        for mem in MusicHandler.posMusic:
+            fileIndex.remove(mem)
+        for mem in MusicHandler.negMusic:
+            fileIndex.remove(mem)
+        for mem in MusicHandler.absMusic:
+            fileIndex.remove(mem)
+        
+        bFeature=0;eFeature=34
+        #tempolar 0-7, MFCC 8-20,chroma 21-32(chroma STD: 33)
+        #If all features are included without normalization, MFCC often dominates
+        for musicNum in fileIndex:
+            absXorrValue=0;
+            ## Using average features, next 34 are standard deviation
+            meanFeature=self.newFactory.musicFiles.mtFeatures[musicNum][bFeature:eFeature]
+            print(meanFeature.shape)
+            for mem in MusicHandler.posMusic: 
+                absXorrValue+=simpleFeatureDis(meanFeature,self.newFactory.musicFiles.mtFeatures[mem][bFeature:eFeature],0,33)
+            for mem in MusicHandler.negMusic:   
+                absXorrValue+=simpleFeatureDis(meanFeature,self.newFactory.musicFiles.mtFeatures[mem][bFeature:eFeature],0,33)
+            MusicHandler.xorrAbsValueDic[musicNum]=absXorrValue
+        print(MusicHandler.xorrAbsValueDic)
+    
+    
+    
     def binaryClassifier(self):
         #self.posMusic=[4];self.negMusic=[1,2]
         posFeature=[];negFeature=[];features=[]
         if MusicHandler.posMusic:
             for pIndex in MusicHandler.posMusic:
-                posFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])
+                if useMean:
+                    posFeature.append(self.newFactory.musicFiles.meanStFeatures[pIndex])
+                else:
+                    posFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])
+                
         if MusicHandler.negMusic:
-            for nIndex in MusicHandler.negMusic:
-                negFeature.append(self.newFactory.musicFiles.stFeatures[nIndex])
+            for nIndex in MusicHandler.negMusic:   
+                if useMean:
+                    negFeature.append(self.newFactory.musicFiles.meanStFeatures[pIndex])
+                else:
+                    negFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])
+                
         
         features.append(posFeature);features.append(negFeature)
         features=featureStack(features)
@@ -84,9 +158,3 @@ class MusicClassifier(MusicHandler):
                 MusicHandler.results.append((i,self.newFactory.musicFiles.fileName[i],predict,predict[0]/(predict[0]+predict[1]),abs(alpha-predict[0]/(predict[0]+predict[1])),trainTypes[argmax(predict)]))
         viewResults(MusicHandler.results)
         
-  
-            
-       
-            
-            
-            
