@@ -51,13 +51,7 @@ def viewResults(results):
     for mem in results:
         print (mem)
         
-# Music Duration must be less than 40sec,,
-def thumbNailProcess(inputFile,musicDuration=20):
-    [Fs, x] = readAudioFile(inputFile)
-    [A1, A2, B1, B2,S] = musicThumbnailing(x, Fs,thumbnailSize=musicDuration)
-    print(A1,A2)
-    
-    return A1
+
         
 #find the peak of cross-correlation between two music features
 import scipy as sp
@@ -86,6 +80,15 @@ def xorrFeatureVec(feature1,feature2,window,step,begin,end):
     return distanceVec,math.sqrt(sumDistance)
         
     
+## all 0-33 ;tempolar 0-7 ;MFCC 8-20;Chromatic 21-33
+## MFCC Contribution dominates. 
+def simpleFeatureDis(meanFeature1,meanFeature2,bFeat=0,eFeat=33):
+    if(len(meanFeature1)!=len(meanFeature2)):
+        print("Warning: The size of the features are not the same")
+    return sum((meanFeature1[bFeat:eFeat]-meanFeature2[bFeat:eFeat])*(meanFeature1[bFeat:eFeat]-meanFeature2[bFeat:eFeat]))
+
+
+
 ## seem to be already normalized.
 def featureWhitten(feature):
     numOfFeature=len(feature)
@@ -93,5 +96,9 @@ def featureWhitten(feature):
     for i in range(numOfFeature):
         newFeature.append((feature[i]-mean(feature[i]))/std(feature[i]))
     return newFeature
+    
+    
+
+    
     
     
