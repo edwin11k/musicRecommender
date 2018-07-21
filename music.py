@@ -16,13 +16,14 @@ class Music(object):
     """ Music object reading files    
     Within the given directory, the class will read all the files    
     """      
-    def __init__(self,dirPath=os.curdir,music_genre=None,window=0.05,step=0.05,thumbNail=True):
+    def __init__(self,dirPath=os.curdir,music_genre=None,window=0.04,step=0.04,thumbNail=True):
         self.dirPath=dirPath
         self.genre=music_genre
         self.fileName=[]
         self.fileData=[]
         self.Fs=[]
         self.stFeatures=[]
+        self.mtFeatures=[]
         self.fileInfo=[]
         self.filePath=[]
         self.thumbNail=[]
@@ -35,6 +36,7 @@ class Music(object):
             self.fileData=pickle.load(fo)
             self.Fs=pickle.load(fo)
             self.stFeatures=pickle.load(fo)
+            self.mtFeatures=pickle.load(fo)
             self.fileInfo=pickle.load(fo)
             self.filePath=pickle.load(fo)
             self.thumbNail=pickle.load(fo)
@@ -48,40 +50,50 @@ class Music(object):
 #            channel=x.shape[1]
 #            if x.ndim>1:
 #                x=stereo2mono(x);fs=int(fs/channel)
+            ## Passing files that have problems
             
             for file in os.listdir(dirPath):
-                [fs,x]=readAudioFile(dirPath+os.sep+file);x=stereo2mono(x);
-                if thumbNail:
-                    B=thumbNailProcess(dirPath+os.sep+file);
-                    #print(fs,fs*B,fs*E)  
-                    E=B+20
-                else:
-                    #print(fs,B,E)
-                    B=0;E=B+20
-                x=x[int(fs*B):int(fs*E)]
-            
+                try:
+             
+                    [fs,x]=readAudioFile(dirPath+os.sep+file);x=stereo2mono(x);
+                    if thumbNail: ## less than 40sec
+                        [B, A, B1, B2,S] = musicThumbnailing(x, fs,thumbnailSize=20)
+                    else:
+                        B=0;
+                    E=B+20;
+                    x=x[int(fs*B):int(fs*E)]
                     
-                if music_genre=='Speech':
-                    print(music_genre+" File Read Located At :"+dirPath+os.sep+file)
-                else:
-                    print(music_genre+" Music File Read Located At :"+dirPath+os.sep+file)
-                
-                self.thumbNail.append((B,E))
-        
-                self.fileData.append(x);self.Fs.append(fs)
-                self.stFeatures.append(stFeatureExtraction(x,fs,window*fs,step*fs)) 
-                self.fileName.append(file)
-                self.filePath.append(dirPath+os.sep+file)
-                # fileName, Sample Frame Rate, window duration, total duration,data Points from file
-                info=(file,fs,window,window*fs,x.shape[0]/fs,int(x.shape[0]/(step*fs)))
-                self.fileInfo.append(info)
-        print(self)
+                    if music_genre=='Speech':
+                        print(music_genre+" File Read Located At :"+dirPath+os.sep+file)
+                    else:
+                        print(music_genre+" Music File Read Located At :"+dirPath+os.sep+file)
+                    
+
+                    mtFeature,stFeature=mtFeatureExtraction(x,fs,200*fs,200*fs,window*fs,step*fs)
+                    # fileName, Sample Frame Rate, window duration, total duration,data Points from file
+                    info=(file,fs,window,window*fs,x.shape[0]/fs,int(x.shape[0]/(step*fs)))
+                    
+                    self.thumbNail.append((B,E))
+                    self.fileData.append(x);
+                    self.Fs.append(fs)
+                    self.stFeatures.append(stFeature) 
+                    self.mtFeatures.append(mtFeature)
+                    self.fileName.append(file)
+                    self.filePath.append(dirPath+os.sep+file)
+                    self.fileInfo.append(info)
+                except:
+                    print("File has passed")
+               
+                    
+            print(self)
+            
+                                    
 
 
     def __str__(self):   
         for i,mem in enumerate(self.fileInfo):
             print()
-            print('File '+str(i+1)+':')
+            print('File '+str(i)+':')
             print('File Name:',mem[0])
             print('File Sampling Rate:',mem[1])
             print('Time Duration of each window:',mem[2],' sec')
@@ -94,7 +106,7 @@ class Music(object):
     def printMusicInfo(self,index):
         print()
         print('----Music Information--------------------')
-        print('File # '+str(index+1))
+        print('File # '+str(index))
         print('Title: ',self.fileInfo[index][0])
         print('Duration:',str(int(self.fileInfo[index][4]))+' sec')
         print('-----------Enjoy The Music --------------')
@@ -115,6 +127,7 @@ class Music(object):
             pickle.dump(self.fileData,fo,protocol=pickle.HIGHEST_PROTOCOL)
             pickle.dump(self.Fs,fo,protocol=pickle.HIGHEST_PROTOCOL)
             pickle.dump(self.stFeatures,fo,protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.mtFeatures,fo,protocol=pickle.HIGHEST_PROTOCOL)
             pickle.dump(self.fileInfo,fo,protocol=pickle.HIGHEST_PROTOCOL)
             pickle.dump(self.filePath,fo,protocol=pickle.HIGHEST_PROTOCOL)
             pickle.dump(self.thumbNail,fo,protocol=pickle.HIGHEST_PROTOCOL)
