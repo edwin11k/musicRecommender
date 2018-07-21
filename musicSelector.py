@@ -58,3 +58,23 @@ class MusicSelector(MusicHandler):
             if mem[4]<minValue:
                 minValue=mem[4];minIndex=mem[0];
         return minIndex
+
+
+    
+    def maxXorrSelect(self):
+        maxValue=-1000000;maxMusicNum=-1;
+        for musicNum,xorrValue in MusicHandler.xorrValueDic.items():
+            if xorrValue>maxValue:
+                maxValue=xorrValue;maxMusicNum=musicNum
+        return maxMusicNum
+        
+    
+    def minXorrSelect(self):
+        minValue=1000000;minMusicNum=-1;
+        for musicNum,xorrValue in MusicHandler.xorrValueDic.items():
+            if xorrValue<minValue:
+                minValue=xorrValue;minMusicNum=musicNum
+        return minMusicNum    
+        
+    
+        
