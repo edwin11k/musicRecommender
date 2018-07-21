@@ -119,6 +119,32 @@ def musicRecommender():
     #classifier.saveClassifier()
     
     
+    ## feature selection needs to be set in util function.Y
+def musicXorrRecommender():
+    print()
+    print("Music Simulator: Based On Response, It Will Find Your Favorites")
+    print()
+    
+    selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()
+    
+    print("Random Choice of Music")
+    newRandomValue=selector.randomSelect()
+    player.musicPlay(newRandomValue)
+    while True:
+        classifier.computeMeanFeatureXorrSum()
+        newMusicValue=selector.minXorrSelect()
+        if newMusicValue==-1:
+            print('Music has run out!')
+            break
+        else:
+            player.musicPlay(newMusicValue)
+            
+        
+        
+    
+    
+    
+    
     
     
 def musicSimulator(modelDir):
@@ -252,8 +278,9 @@ def musicSimulatorAlpha(modelDir):
     
     
 #modelMaker()   
+musicXorrRecommender()
 #musicRecommender()
 #musicSimulator(modelDir1)
 #musicRecommenderAlpha()
 #musicSimulatorAlpha(modelDir1)
-modelPredictionTester()
+#modelPredictionTester()
