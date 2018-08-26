@@ -77,4 +77,56 @@ class MusicSelector(MusicHandler):
         return minMusicNum    
         
     
+    #find the data points that are the farthest from decision boundary
+    def findMostOutData(self,ML='SVMLinear',mode='MFCC'):
+        print('Finding data points that are most distanced from decison boundary')
+        
+        if mode=='MFCC':
+            bIndex=9;eIndex=21;
+        if mode=='Chromatic':
+            bIndex=22;eIndex=33;
+        if mode=='Tempolar':
+            bIndex=1;eIndex=8;
+            
+        size=len(self.newFactory.musicFiles.fileData)
+        fileIndex=list(range(size))
+        for mem in MusicHandler.posMusic:
+            if mem!=None:
+                fileIndex.remove(mem)                            
+        for mem in MusicHandler.negMusic:
+            if mem!=None:
+                fileIndex.remove(mem)                
+        for mem in MusicHandler.absMusic:
+            if mem!=None:
+                fileIndex.remove(mem)        
+        if ML=='SVMLinear':       
+            minDist=100;maxDist=-100;minIndex=None;maxIndex=None;
+            for pIndex in fileIndex:
+                testData=np.transpose(self.newFactory.musicFiles.mtFeatures[pIndex][bIndex-1:eIndex])
+                if mode=='MFCC':
+                    dist=MusicHandler.modelMFCC.decision_function(testData)
+                elif mode=='Chromatic':
+                    dist=MusicHandler.modelChromatic.decision_function(testData)
+                else:
+                    dist=MusicHandler.modelTempolar.decision_function(testData)
+                print(pIndex,dist)
+                if dist>maxDist and dist>0:
+                    maxDist=dist;maxIndex=pIndex
+                if dist<minDist and dist<0:
+                    minDist=dist;minIndex=pIndex
+        print(mode,minIndex,maxIndex)
+        return minIndex,maxIndex
+                
+                
+    def addMusicIndex(self,index):
+        #print("Index:",index)
+        for mem in index:
+            print(self.newFactory.musicFiles.like[mem])
+            if(self.newFactory.musicFiles.like[mem]==True):
+                self.posMusic.append(mem)
+            if(self.newFactory.musicFiles.like[mem]==False):
+                self.negMusic.append(mem)
+       # print("Pos music",self.posMusic)
+        #print("Neg Music",self.negMusic)
+        
         
