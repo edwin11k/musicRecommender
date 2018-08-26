@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Feb 16 11:18:49 2018
-
-@author: edwin
-"""
-
-from musicFactory import *
 
 #This is the folder where music files are located
 defaultDir1='C:/Users/edwin/Documents/music/musicSimulator/musicFile/Test3'
@@ -24,8 +16,15 @@ class MusicHandler(object):
     
     #Past choices will be saved in history
     history={}
-    musicCount=20
+    musicCount=41
     # will be overwritten 
+    xorrValueDic={}
+    xorrAbsValueDic={}
+    
+    #Classifier Models
+    modelMFCC=None;
+    modelChromatic=None;
+    modelTempolar=None;
 
     ###player----
     def musicPlay(self):
@@ -33,8 +32,22 @@ class MusicHandler(object):
     
     def displayHistory(self):
         pass
+     
+    ## selector-----
+    def randomSelect(self):
+        pass
+     
+    ## Classifier-----
+    def binaryClassifier(self):
+        pass
     
- 
+    def testClassifier(self):
+        pass
+        
+    def mostFavSelect(self):
+        pass
+    
+
     
     ## selector-----
     def randomSelect(self):
