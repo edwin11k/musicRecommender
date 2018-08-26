@@ -5,12 +5,15 @@ from pyAudioAnalysis.audioFeatureExtraction import *
 from pyAudioAnalysis.audioSegmentation import *
 from pyAudioAnalysis.audioVisualization import *
 from pyAudioAnalysis.audioTrainTest import *
+from pydub import AudioSegment
+from pydub.playback import play
 from util import *
 import os
 import pickle
 
 
-
+playSong=True
+musicLikeInput=True;
 
 class Music(object): 
     """ Music object reading files    
@@ -27,6 +30,7 @@ class Music(object):
         self.fileInfo=[]
         self.filePath=[]
         self.thumbNail=[]
+        self.like=[]
         
         print()      
         try:
@@ -40,16 +44,11 @@ class Music(object):
             self.fileInfo=pickle.load(fo)
             self.filePath=pickle.load(fo)
             self.thumbNail=pickle.load(fo)
+            self.like=pickle.load(fo)
             fo.close()
             print('Previous Music Data File Exists & Loading the File')
         except:
             print('No Music Data File Exists, Begin Reading!')
-            
-            ## pydub seems to have already adjusted the frequency sampling for multi channel, hence commented out
-#            # If the signal is multichannel, reduce it down to mono for analysis
-#            channel=x.shape[1]
-#            if x.ndim>1:
-#                x=stereo2mono(x);fs=int(fs/channel)
             ## Passing files that have problems
             
             for file in os.listdir(dirPath):
@@ -68,7 +67,7 @@ class Music(object):
                     else:
                         print(music_genre+" Music File Read Located At :"+dirPath+os.sep+file)
                     
-
+                    
                     mtFeature,stFeature=mtFeatureExtraction(x,fs,200*fs,200*fs,window*fs,step*fs)
                     # fileName, Sample Frame Rate, window duration, total duration,data Points from file
                     info=(file,fs,window,window*fs,x.shape[0]/fs,int(x.shape[0]/(step*fs)))
@@ -81,19 +80,62 @@ class Music(object):
                     self.fileName.append(file)
                     self.filePath.append(dirPath+os.sep+file)
                     self.fileInfo.append(info)
+                    #saving human response on the music
+                    if musicLikeInput:
+                        song=AudioSegment.from_file(dirPath+os.sep+file)
+                        if playSong:
+                            play(song[int(1000*B):int(1000*E)])
+                        while True:
+                            answer=input('Do you like the music(Yes|No)?[Y|N]')
+                            if answer=='Y':
+                                self.like.append(True);break
+                            if answer=='N':
+                                self.like.append(False);break
+                            print ('Wrong Input: Answer Must Be Y or N') 
+                            print()
+                    else:
+                        self.like.append(None)
+                           
                 except:
-                    print("File has passed")
-               
-                    
-            print(self)
+                    print(file+" has passed")
+            self.mtFeatureWhiten()
             
-                                    
+ 
+
+    import numpy as np
+    def mtFeatureWhiten(self):
+        print("Midterm features whitening")
+        
+        dim=len(self.mtFeatures[0])
+        meanValue=np.zeros((dim,1))
+        meanValue2=np.zeros((dim,1))
+        
+        #compute meanvalue and standard deviation
+        for mem in self.mtFeatures:
+            # simple trick to convert list to array
+            temp=np.zeros((dim,1));temp+=mem;
+            meanValue+=temp.copy()
+            meanValue2+=temp.copy()*temp.copy()
+        meanValue=meanValue/len(self.mtFeatures);meanValue2=meanValue2/len(self.mtFeatures)
+        std=np.sqrt(meanValue2-meanValue*meanValue)
+                
+        newFeatures=[]
+        for mem in self.mtFeatures:
+            temp=np.zeros((dim,1));temp+=mem;
+            temp=(temp-meanValue)/std
+         
+            newFeatures.append(temp)
+        self.mtFeatures=newFeatures
+        print("Whitened features saved!")
+            
+            
+            
 
 
     def __str__(self):   
         for i,mem in enumerate(self.fileInfo):
             print()
-            print('File '+str(i)+':')
+            print('File '+str(i+1)+':')
             print('File Name:',mem[0])
             print('File Sampling Rate:',mem[1])
             print('Time Duration of each window:',mem[2],' sec')
@@ -131,6 +173,7 @@ class Music(object):
             pickle.dump(self.fileInfo,fo,protocol=pickle.HIGHEST_PROTOCOL)
             pickle.dump(self.filePath,fo,protocol=pickle.HIGHEST_PROTOCOL)
             pickle.dump(self.thumbNail,fo,protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.like,fo,protocol=pickle.HIGHEST_PROTOCOL)
             fo.close()
             print('New Music Data File Has Been Saved!')
             
