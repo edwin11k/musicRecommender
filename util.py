@@ -88,17 +88,4 @@ def simpleFeatureDis(meanFeature1,meanFeature2,bFeat=0,eFeat=33):
     return sum((meanFeature1[bFeat:eFeat]-meanFeature2[bFeat:eFeat])*(meanFeature1[bFeat:eFeat]-meanFeature2[bFeat:eFeat]))
 
 
-
-## seem to be already normalized.
-def featureWhitten(feature):
-    numOfFeature=len(feature)
-    newFeature=[]
-    for i in range(numOfFeature):
-        newFeature.append((feature[i]-mean(feature[i]))/std(feature[i]))
-    return newFeature
-    
-    
-
-    
-    
-    
+ 
