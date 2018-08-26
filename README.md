@@ -45,3 +45,10 @@ The algorithm works as following:
 
 1. Added Thumbnail function
 2. Predictive Modelling 
+
+4th Update: August 26 2018
+
+1. Use mtFeatures: Average and standard deviation of st features
+   - This will result in a single point from a music sample 
+2. Feature whitening
+   - Since all feature values vary greatly, it is necessary to implement feature whitening
