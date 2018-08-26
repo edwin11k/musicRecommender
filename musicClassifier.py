@@ -15,7 +15,7 @@ import os
 ## If set true, use a single mean data of features in 34 dimension instead of 500 data points.
 useMean=True;
 class MusicClassifier(MusicHandler):
-    MLAlgorithm="SVM_RBF"
+    #MLAlgorithm="SVM_RBF"
     # SVM Classifier for files in posMusic & negMusic
     
     
@@ -79,27 +79,23 @@ class MusicClassifier(MusicHandler):
             MusicHandler.xorrAbsValueDic[musicNum]=absXorrValue
         print(MusicHandler.xorrAbsValueDic)
     
-    
-    
+
+
+
+    """ Vanilla binary Classifier"""
     def binaryClassifier(self):
-        #self.posMusic=[4];self.negMusic=[1,2]
+        self.MLAlgorithm='SVM'
+        
         posFeature=[];negFeature=[];features=[]
         if MusicHandler.posMusic:
             for pIndex in MusicHandler.posMusic:
-                if useMean:
-                    posFeature.append(self.newFactory.musicFiles.meanStFeatures[pIndex])
-                else:
-                    posFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])
-                
+                posFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])        
         if MusicHandler.negMusic:
             for nIndex in MusicHandler.negMusic:   
-                if useMean:
-                    negFeature.append(self.newFactory.musicFiles.meanStFeatures[pIndex])
-                else:
-                    negFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])
-                
+                negFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])
+              
         
-        features.append(posFeature);features.append(negFeature)
+        features.append(negFeature);features.append(posFeature)
         features=featureStack(features)
         #print(features[0].shape,features[1].shape)
                     
@@ -124,13 +120,103 @@ class MusicClassifier(MusicHandler):
             self.model=trainExtraTrees(features,100)
             
 
+    
+    """ Binary co Work Classifier """
+    def binaryCoMLClassifier(self,mode='MFCC',MLAlgorithm='SVM_RBF'):
+        #self.posMusic=[4];self.negMusic=[1,2]
+        posFeature=[];negFeature=[];features=[]
+        
+        if mode=='MFCC':
+            bIndex=9;eIndex=21;
+        if mode=='Chromatic':
+            bIndex=22;eIndex=33;
+        if mode=='Tempolar':
+            bIndex=1;eIndex=8;
+            
+        if MusicHandler.posMusic:
+            for pIndex in MusicHandler.posMusic:
+                if pIndex!=None:
+                    posFeature.append(self.newFactory.musicFiles.mtFeatures[pIndex][bIndex-1:eIndex])
+                                 
+                
+        if MusicHandler.negMusic:
+            for nIndex in MusicHandler.negMusic: 
+                if nIndex!=None:
+                    negFeature.append(self.newFactory.musicFiles.mtFeatures[nIndex][bIndex-1:eIndex])
+                
+        ## zero= False, one= True
+        features.append(posFeature);features.append(negFeature)
+        print('Features(positive,negative):',len(posFeature),len(negFeature))     
+        features=featureStack(features)
+        
+        if MLAlgorithm=='SVM_RBF':
+            print('SVM RBF Classifier')
+            if mode=='MFCC':
+                MusicHandler.modelMFCC=trainSVM_RBF(features,0.1)
+            if mode=='Chromatic':
+                MusicHandler.modelChromatic=trainSVM_RBF(features,0.1)
+            if mode=='Tempolar':
+                MusicHandler.modelTempolar=trainSVM_RBF(features,0.1)
+            
+                
+        if MLAlgorithm=='SVM_Linear':
+            print('SVM Linear Classifier')
+            if mode=='MFCC':
+                MusicHandler.modelMFCC=trainSVM(features,0.1)
+            if mode=='Chromatic':
+                MusicHandler.modelChromatic=trainSVM(features,0.1)
+            if mode=='Tempolar':
+                MusicHandler.modelTempolar=trainSVM(features,0.1)
+                
+        if MLAlgorithm=='RandomForest':
+            print('Random Forest Classifier')
+            if mode=='MFCC':
+                MusicHandler.modelMFCC=trainRandomForest(features,100)
+            if mode=='Chromatic':
+                MusicHandler.modelChromatic=trainRandomForest(features,100)
+            if mode=='Tempolar':
+                MusicHandler.modelTempolar=trainRandomForest(features,100)
 
-    def saveClassifier(self):
+        if MLAlgorithm=='GradientBoosting':
+            print('Gradient Boosting Classifier')
+            if mode=='MFCC':
+                MusicHandler.modelMFCC=trainGradientBoosting(features,100)
+            if mode=='Chromatic':
+                MusicHandler.modelChromatic=trainGradientBoosting(features,100)
+            if mode=='Tempolar':
+                MusicHandler.modelTempolar=trainGradientBoosting(features,100)
+                
+
+        if MLAlgorithm=='ExtraTrees':
+            print('Extra Trees Classifier')
+            if mode=='MFCC':
+                MusicHandler.modelMFCC=trainExtraTrees(features,100)
+            if mode=='Chromatic':
+                MusicHandler.modelChromatic=trainExtraTrees(features,100)
+            if mode=='Tempolar':
+                MusicHandler.modelTempolar=trainExtraTrees(features,100)
+                
+                
+                
+            
+
+
+    def saveClassifier(self,modelString=None,model=None):
         print('Model is being saved! This may take a while!')
-        modelString=MusicHandler.defaultDir+os.sep+self.MLAlgorithm+'_Model';
+        if modelString==None:
+            modelString=MusicHandler.defaultDir+os.sep+self.MLAlgorithm+'_Model';
+        else:
+            modelString=MusicHandler.defaultDir+os.sep+modelString;
+        
         with open(modelString, 'wb') as fid:
+            if model==None:
                 pickle.dump(self.model,fid)
-        print(self.MLAlgorithm+' Model Has been Saved')         
+            if model=="Chromatic":
+                pickle.dump(MusicHandler.modelChromatic,fid)
+            if model=="MFCC":
+                pickle.dump(MusicHandler.modelMFCC,fid)
+            
+        print(' Model Has been Saved')         
         
     
     
@@ -158,3 +244,21 @@ class MusicClassifier(MusicHandler):
                 MusicHandler.results.append((i,self.newFactory.musicFiles.fileName[i],predict,predict[0]/(predict[0]+predict[1]),abs(alpha-predict[0]/(predict[0]+predict[1])),trainTypes[argmax(predict)]))
         viewResults(MusicHandler.results)
         
+  
+            
+    def validateClassifier(self,testIndex):       
+        features=self.newFactory.musicFiles.mtFeatures
+        result=dict()
+        total=0;correct=0
+        for i,feature in enumerate(features):
+            if i in testIndex:        
+                #print(features[i][0:34].reshape(1,-1))
+                #result[i]=self.model.predict(features[i][0:34].reshape(1,-1))
+                #print(i,self.newFactory.musicFiles.like[i])
+                if(self.newFactory.musicFiles.like[i]==self.model.predict(features[i][0:34].reshape(1,-1))):
+                    correct+=1
+                    print(self.newFactory.musicFiles.like[i],self.model.predict(features[i][0:34].reshape(1,-1)))
+                total+=1
+        print("Value:",correct/total)
+
+            
