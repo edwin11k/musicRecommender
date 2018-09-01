@@ -78,7 +78,7 @@ class MusicSelector(MusicHandler):
         
     
     #find the data points that are the farthest from decision boundary
-    def findMostOutData(self,ML='SVMLinear',mode='MFCC'):
+    def findMostOutData(self,indexPool,ML='SVMLinear',mode='MFCC'):
         print('Finding data points that are most distanced from decison boundary')
         
         if mode=='MFCC':
@@ -88,16 +88,16 @@ class MusicSelector(MusicHandler):
         if mode=='Tempolar':
             bIndex=1;eIndex=8;
             
-        size=len(self.newFactory.musicFiles.fileData)
-        fileIndex=list(range(size))
+        
+        fileIndex=indexPool  # Training data pool,
         for mem in MusicHandler.posMusic:
-            if mem!=None:
+            if mem!=None and mem in fileIndex:
                 fileIndex.remove(mem)                            
         for mem in MusicHandler.negMusic:
-            if mem!=None:
+            if mem!=None and mem in fileIndex:
                 fileIndex.remove(mem)                
         for mem in MusicHandler.absMusic:
-            if mem!=None:
+            if mem!=None and mem in fileIndex:
                 fileIndex.remove(mem)        
         if ML=='SVMLinear':       
             minDist=100;maxDist=-100;minIndex=None;maxIndex=None;
