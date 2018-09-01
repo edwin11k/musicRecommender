@@ -83,16 +83,28 @@ class MusicClassifier(MusicHandler):
 
 
     """ Vanilla binary Classifier"""
-    def binaryClassifier(self):
+    def binaryClassifier(self,mode=None):
         self.MLAlgorithm='SVM'
         
         posFeature=[];negFeature=[];features=[]
         if MusicHandler.posMusic:
             for pIndex in MusicHandler.posMusic:
-                posFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])        
+                if mode==None:
+                    posFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])    
+                elif mode=='MFCC_Chromatic':
+                    posFeature.append(self.newFactory.musicFiles.stFeatures[pIndex][8:33])   
+                else:
+                    print("Please enter valid mode");
+                    
         if MusicHandler.negMusic:
-            for nIndex in MusicHandler.negMusic:   
-                negFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])
+            for nIndex in MusicHandler.negMusic:  
+                if mode==None:
+                    negFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])
+                elif mode=='MFCC_Chromatic':
+                    negFeature.append(self.newFactory.musicFiles.stFeatures[pIndex][8:33])
+                else:
+                    print("Please enter valid mode")
+                
               
         
         features.append(negFeature);features.append(posFeature)
@@ -246,18 +258,26 @@ class MusicClassifier(MusicHandler):
         
   
             
-    def validateClassifier(self,testIndex):       
+    def validateClassifier(self,testIndex,mode=None):   
+        classifierModel=None
+        if mode==None:
+            begin=0;end=34;classifierModel=self.model
+        elif mode=="MFCC_Chromatic":
+            begin=8;end=33;classifierModel=self.model
+        elif mode=='MFCC':
+            begin=8;end=21;classifierModel=MusicHandler.modelMFCC
+        elif mode=='Chromatic':
+            begin=21;end=33;classifierModel=MusicHandler.modelChromatic
         features=self.newFactory.musicFiles.mtFeatures
-        result=dict()
         total=0;correct=0
         for i,feature in enumerate(features):
             if i in testIndex:        
                 #print(features[i][0:34].reshape(1,-1))
                 #result[i]=self.model.predict(features[i][0:34].reshape(1,-1))
                 #print(i,self.newFactory.musicFiles.like[i])
-                if(self.newFactory.musicFiles.like[i]==self.model.predict(features[i][0:34].reshape(1,-1))):
+                if(self.newFactory.musicFiles.like[i]==classifierModel.predict(features[i][begin:end].reshape(1,-1))):
                     correct+=1
-                    print(self.newFactory.musicFiles.like[i],self.model.predict(features[i][0:34].reshape(1,-1)))
+                    print(self.newFactory.musicFiles.like[i],classifierModel.predict(features[i][begin:end].reshape(1,-1)))
                 total+=1
         print("Value:",correct/total)
 
