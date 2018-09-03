@@ -110,16 +110,38 @@ def musicRecommender():
     
     
     ## feature selection needs to be set in util function.Y
+    import random 
 def refSVMtest():
     print()
     print("SVM Training & Test")
     print()
-    selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()
-    totalNumber=selector.musicCount
-    print(totalNumber)  
-    trainIndex=[4,6,7,11,12,17,18,21,23,26,28,29,30,34,35,36,37,38,39,40]
-    testIndex=[0,1,2,3,5,8,9,10,13,14,15,16,19,20,22,24,25,27,31,32,33]
-    print(len(trainIndex),len(testIndex))
+    selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()    
+    print("TotalNumber of music in the folder:", selector.musicCount)     
+    #music index Pool
+    indexU=list(range(0,selector.musicCount-1))
+    
+    # Assign random test file from the pool
+    numOfTestSample=20;print("Number of test samples: ",numOfTestSample)
+    testIndex=random.sample(range(0,selector.musicCount-1),numOfTestSample)
+    
+    # remove testing file from the pool
+    for mem in testIndex:
+        if mem in indexU:
+            indexU.remove(mem)
+    
+    numOfTrainSample=40;
+    trainNum=random.sample(range(0,len(indexU)-1),numOfTrainSample)
+    print("Number of test samples: ",numOfTrainSample)
+    
+    # assign random training file from the pool
+    trainIndex=[]
+    for mem in trainNum:
+        trainIndex.append(indexU[mem])
+        
+    
+    print("Test Index:",testIndex)
+    print("Train Index:",trainIndex)
+    
     selector.addMusicIndex(trainIndex)
     print(MusicHandler.posMusic,MusicHandler.negMusic)
     classifier.binaryClassifier(mode='MFCC_Chromatic')
