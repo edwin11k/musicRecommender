@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Feb 16 11:18:49 2018
+
+@author: edwin
+"""
+
+from musicFactory import *
 
 #This is the folder where music files are located
 defaultDir1='C:/Users/edwin/Documents/music/musicSimulator/musicFile/Test3'
@@ -16,7 +24,7 @@ class MusicHandler(object):
     
     #Past choices will be saved in history
     history={}
-    musicCount=41
+    musicCount=len(newFactory.musicFiles.like)
     # will be overwritten 
     xorrValueDic={}
     xorrAbsValueDic={}
@@ -47,20 +55,13 @@ class MusicHandler(object):
     def mostFavSelect(self):
         pass
     
-
     
-    ## selector-----
-    def randomSelect(self):
-        pass
-     
-    ## Classifier-----
-    def binaryClassifier(self):
-        pass
-    
-    def testClassifier(self):
-        pass
+    def resetMusic(self):
+        posMusic=[];negMusic=[];absMusic=[];results=[]
         
-    def mostFavSelect(self):
-        pass
-    
-    
+        
+        
+      
+        
+        
+        
