@@ -78,17 +78,19 @@ class MusicSelector(MusicHandler):
         
     
     #find the data points that are the farthest from decision boundary
-    def findMostOutData(self,indexPool,ML='SVMLinear',mode='MFCC'):
-        print('Finding data points that are most distanced from decison boundary')
+    def findMostOutData(self,indexPool,ML="SVMLinear",mode="MFCC"):
+        print('Finding data points that are most distanced from decison boundary. Mode(',mode,')')
         
         if mode=='MFCC':
-            bIndex=9;eIndex=21;
+            bIndex=9;eIndex=21;model=MusicHandler.modelMFCC
+            print("MFCC Model")
         if mode=='Chromatic':
-            bIndex=22;eIndex=33;
+            bIndex=22;eIndex=33;model=MusicHandler.modelChromatic
+            print("Chromatic Model")
         if mode=='Tempolar':
-            bIndex=1;eIndex=8;
-            
-        
+            bIndex=1;eIndex=8;model=MusicHandler.modelTempolar
+            print("Tempolar Model")
+                   
         fileIndex=indexPool  # Training data pool,
         for mem in MusicHandler.posMusic:
             if mem!=None and mem in fileIndex:
@@ -96,20 +98,16 @@ class MusicSelector(MusicHandler):
         for mem in MusicHandler.negMusic:
             if mem!=None and mem in fileIndex:
                 fileIndex.remove(mem)                
-        for mem in MusicHandler.absMusic:
-            if mem!=None and mem in fileIndex:
-                fileIndex.remove(mem)        
+        print('Hello! Current Mode:',mode)
+    
         if ML=='SVMLinear':       
             minDist=100;maxDist=-100;minIndex=None;maxIndex=None;
-            for pIndex in fileIndex:
+                        
+            for pIndex in fileIndex:        
                 testData=np.transpose(self.newFactory.musicFiles.mtFeatures[pIndex][bIndex-1:eIndex])
-                if mode=='MFCC':
-                    dist=MusicHandler.modelMFCC.decision_function(testData)
-                elif mode=='Chromatic':
-                    dist=MusicHandler.modelChromatic.decision_function(testData)
-                else:
-                    dist=MusicHandler.modelTempolar.decision_function(testData)
-                print(pIndex,dist)
+                dist=model.decision_function(testData)
+                #print(pIndex,dist)
+                             
                 if dist>maxDist and dist>0:
                     maxDist=dist;maxIndex=pIndex
                 if dist<minDist and dist<0:
@@ -119,14 +117,14 @@ class MusicSelector(MusicHandler):
                 
                 
     def addMusicIndex(self,index):
-        #print("Index:",index)
         for mem in index:
-            print(self.newFactory.musicFiles.like[mem])
+            #print(self.newFactory.musicFiles.like[mem])
             if(self.newFactory.musicFiles.like[mem]==True):
                 self.posMusic.append(mem)
             if(self.newFactory.musicFiles.like[mem]==False):
                 self.negMusic.append(mem)
-       # print("Pos music",self.posMusic)
-        #print("Neg Music",self.negMusic)
+
         
-        
+
+
+    
