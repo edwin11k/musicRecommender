@@ -112,6 +112,8 @@ def musicRecommender():
     ## feature selection needs to be set in util function.Y
     import random 
 def refSVMtest():
+    ## Reference SVM test to compare with
+    
     print()
     print("SVM Training & Test")
     print()
@@ -121,7 +123,7 @@ def refSVMtest():
     indexU=list(range(0,selector.musicCount-1))
     
     # Assign random test file from the pool
-    numOfTestSample=20;print("Number of test samples: ",numOfTestSample)
+    numOfTestSample=30;print("Number of test samples: ",numOfTestSample)
     testIndex=random.sample(range(0,selector.musicCount-1),numOfTestSample)
     
     # remove testing file from the pool
@@ -129,30 +131,101 @@ def refSVMtest():
         if mem in indexU:
             indexU.remove(mem)
     
-    numOfTrainSample=40;
-    trainNum=random.sample(range(0,len(indexU)-1),numOfTrainSample)
-    print("Number of test samples: ",numOfTrainSample)
+    # Collect separate response indexes in the index pool
+    posUIndex=[];negUIndex=[]
+    for mem in indexU:
+        if MusicHandler.newFactory.musicFiles.like[mem]==True:
+            posUIndex.append(mem)
+        if MusicHandler.newFactory.musicFiles.like[mem]==False:
+            negUIndex.append(mem)    
+      
+    # for each response, select same number of samples
+    numOfPosTrain=21;numOfNegTrain=numOfPosTrain;   # total 21+21=42
+    trainPosNum=random.sample(range(0,len(posUIndex)-1),numOfPosTrain)
+    trainNegNum=random.sample(range(0,len(negUIndex)-1),numOfNegTrain)
+    
+    print("Number of train samples: ",numOfPosTrain+numOfNegTrain)
     
     # assign random training file from the pool
+    
     trainIndex=[]
-    for mem in trainNum:
-        trainIndex.append(indexU[mem])
+    for mem in trainPosNum:
+        trainIndex.append(posUIndex[mem])
+    for mem in trainNegNum:
+        trainIndex.append(negUIndex[mem])        
         
     
-    print("Test Index:",testIndex)
-    print("Train Index:",trainIndex)
-    
     selector.addMusicIndex(trainIndex)
-    print(MusicHandler.posMusic,MusicHandler.negMusic)
+    #print(MusicHandler.posMusic,MusicHandler.negMusic)
     classifier.binaryClassifier(mode='MFCC_Chromatic')
     classifier.saveClassifier()
     classifier.validateClassifier(testIndex,mode='MFCC_Chromatic')
+ 
     
+    ''' CoWork Test. Do not use previous train test '''
+    print("Co Work Test Using SVM: Two Features Group")
+    print("Same Test data, but train data will be selected using algorithm")
+    print("Features are divided into MFCC and Chromatic, tempolar will be ignored")
+    ## Positive & Negative index from the pool UIndex
+        
+       
+    beginRandomNumber=5;
+    trainIndex=[]
+    posRandomNumber=random.sample(range(0,len(posUIndex)-1),beginRandomNumber)
+    negRandomNumber=random.sample(range(0,len(negUIndex)-1),beginRandomNumber)
+     
+    print("Test Index",testIndex)
+    print("UIndex",indexU)
+    print("Positive Random Number",posRandomNumber)
+    print("Negative Random Number",negRandomNumber)
+     
+    for mem in posRandomNumber:
+        trainIndex.append(posUIndex[mem]);indexU.remove(posUIndex[mem])
+    for mem in negRandomNumber:
+        trainIndex.append(negUIndex[mem]);indexU.remove(negUIndex[mem])
+        
+    print("Train Index",trainIndex)
+    
+    # Empty data from previous run
+    MusicHandler.posMusic=[];MusicHandler.negMusic=[]
+    selector.addMusicIndex(trainIndex)
+    print("Positive Index:",MusicHandler.posMusic)
+    print("Negative Index:",MusicHandler.negMusic)
+    coXiter=8;
+    print('coXiter:',coXiter)
+    iterI=0;
+    while iterI<coXiter:
+        ## MFCC Data Addition
+        classifier.binaryCoMLClassifier(mode='MFCC',MLAlgorithm='SVM_Linear') 
+        minMFCCIndex,maxMFCCIndex=selector.findMostOutData(indexU,ML='SVMLinear',mode='MFCC')
+        print(minMFCCIndex,maxMFCCIndex)
+        if minMFCCIndex!=None:
+            MusicSelector.negMusic.append(minMFCCIndex);indexU.remove(minMFCCIndex)
+        if maxMFCCIndex!=None:
+            MusicSelector.posMusic.append(maxMFCCIndex);indexU.remove(maxMFCCIndex)
+        print("Positive Index:",MusicHandler.posMusic);print("Negative Index:",MusicHandler.negMusic)
+        
+        ## Chromatic Data Addition
+        classifier.binaryCoMLClassifier(mode='Chromatic',MLAlgorithm='SVM_Linear')
+        minChromaIndex,maxChromaIndex=selector.findMostOutData(indexU,ML='SVMLinear',mode='Chromatic')
+        print(minChromaIndex,maxChromaIndex)
+        if minChromaIndex!=None:
+            MusicSelector.negMusic.append(minChromaIndex);indexU.remove(minChromaIndex)
+        if maxChromaIndex!=None:
+            MusicSelector.posMusic.append(maxChromaIndex);indexU.remove(maxChromaIndex)        
+        print("Positive Index:",MusicHandler.posMusic);print("Negative Index:",MusicHandler.negMusic)
+        iterI+=1
+        
+    classifier.binaryClassifier(mode='MFCC_Chromatic')
+    classifier.saveClassifier()
+    classifier.validateClassifier(testIndex,mode='MFCC_Chromatic')        
+        
+        
     
             
-def musicCoWorktest():
+def musicCoWorktest(testIndex,Uindex):
     print()
-    print("SVM Training & Test")
+    print("Co Work Test using SVM: Features are divided into two groups")
     print()
     
     selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()
@@ -171,7 +244,6 @@ def musicCoWorktest():
     while iterI<coXiter:
         ## Binary classifier using MFCC features or Chromatic featurss
         classifier.binaryCoMLClassifier(mode='MFCC',MLAlgorithm='SVM_Linear')
-        classifier.binaryCoMLClassifier(mode='Chromatic',MLAlgorithm='SVM_Linear')
         
         #find the most outlier date from the training pool
         minMFCCIndex,maxMFCCIndex=selector.findMostOutData(trainIndex,ML='SVMLinear',mode='MFCC')
@@ -183,10 +255,8 @@ def musicCoWorktest():
             MusicSelector.posMusic.append(maxMFCCIndex)
              
         print('Pos',MusicSelector.posMusic);print('Neg',MusicSelector.negMusic)
-        
-        
-        classifier.binaryCoMLClassifier(mode='Chromatic',MLAlgorithm='SVM_Linear')
-        
+                
+        classifier.binaryCoMLClassifier(mode='Chromatic',MLAlgorithm='SVM_Linear')        
         minChromaIndex,maxChromaIndex=selector.findMostOutData(trainIndex,ML='SVMLinear',mode='Chromatic')
         if minChromaIndex!=None:
             MusicSelector.negMusic.append(minChromaIndex)
@@ -195,8 +265,6 @@ def musicCoWorktest():
         print('Pos',MusicSelector.posMusic);print('Neg',MusicSelector.negMusic)
         iterI+=1
         
-   # classifier.saveClassifier("coSVM_MFCC","MFCC")
-   # classifier.saveClassifier("coSVM_Chromatic","Chromatic")
     classifier.validateClassifier(testIndex,mode='MFCC')
     classifier.validateClassifier(testIndex,mode='Chromatic')
     
@@ -373,8 +441,8 @@ def musicSimulatorAlpha(modelDir):
     player.displayHistory()
     classifier.saveClassifier()
     
-musicCoWorktest()       
-#refSVMtest()
+#musicCoWorktest()       
+refSVMtest()
 #musicCowork()
 #modelMaker()   
 #musicXorrRecommender()
