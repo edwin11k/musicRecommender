@@ -134,7 +134,7 @@ class MusicClassifier(MusicHandler):
 
     
     """ Binary co Work Classifier """
-    def binaryCoMLClassifier(self,mode='MFCC',MLAlgorithm='SVM_RBF'):
+    def binaryCoMLClassifier(self,mode='MFCC',MLAlgorithm='SVM_Linear'):
         #self.posMusic=[4];self.negMusic=[1,2]
         posFeature=[];negFeature=[];features=[]
         
@@ -149,8 +149,7 @@ class MusicClassifier(MusicHandler):
             for pIndex in MusicHandler.posMusic:
                 if pIndex!=None:
                     posFeature.append(self.newFactory.musicFiles.mtFeatures[pIndex][bIndex-1:eIndex])
-                                 
-                
+                                      
         if MusicHandler.negMusic:
             for nIndex in MusicHandler.negMusic: 
                 if nIndex!=None:
@@ -171,14 +170,16 @@ class MusicClassifier(MusicHandler):
                 MusicHandler.modelTempolar=trainSVM_RBF(features,0.1)
             
                 
-        if MLAlgorithm=='SVM_Linear':
-            print('SVM Linear Classifier')
+        if MLAlgorithm=='SVM_Linear':    
             if mode=='MFCC':
                 MusicHandler.modelMFCC=trainSVM(features,0.1)
+                print('SVM Linear Classifier with MFCC features')
             if mode=='Chromatic':
                 MusicHandler.modelChromatic=trainSVM(features,0.1)
+                print('SVM Linear Classifier with Chromatic features')
             if mode=='Tempolar':
                 MusicHandler.modelTempolar=trainSVM(features,0.1)
+                print('SVM Linear Classifier with Tempolar features')
                 
         if MLAlgorithm=='RandomForest':
             print('Random Forest Classifier')
