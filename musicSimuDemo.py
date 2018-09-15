@@ -19,7 +19,10 @@ coXiter=10;
 
 
 
-    
+def dataViewPCA():
+    print("Dimensional reduction & viewing the data")
+    selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()
+    classifier.mtFeaturePCA(mode="Full")
 
 
 def modelMaker():
@@ -49,6 +52,7 @@ def modelMaker():
     classifier.binaryClassifier()
     classifier.saveClassifier()
     
+
 
 def modelPredictionTester():
     print()
@@ -111,7 +115,7 @@ def musicRecommender():
     
     ## feature selection needs to be set in util function.Y
     import random 
-def refSVMtest():
+def refSVMvsCoWorkSVMTest():
     ## Reference SVM test to compare with
     
     print()
@@ -123,7 +127,7 @@ def refSVMtest():
     indexU=list(range(0,selector.musicCount-1))
     
     # Assign random test file from the pool
-    numOfTestSample=30;print("Number of test samples: ",numOfTestSample)
+    numOfTestSample=40;print("Number of test samples: ",numOfTestSample)
     testIndex=random.sample(range(0,selector.musicCount-1),numOfTestSample)
     
     # remove testing file from the pool
@@ -140,7 +144,7 @@ def refSVMtest():
             negUIndex.append(mem)    
       
     # for each response, select same number of samples
-    numOfPosTrain=21;numOfNegTrain=numOfPosTrain;   # total 21+21=42
+    numOfPosTrain=20;numOfNegTrain=numOfPosTrain;   # total 21+21=42
     trainPosNum=random.sample(range(0,len(posUIndex)-1),numOfPosTrain)
     trainNegNum=random.sample(range(0,len(negUIndex)-1),numOfNegTrain)
     
@@ -169,7 +173,7 @@ def refSVMtest():
     ## Positive & Negative index from the pool UIndex
         
        
-    beginRandomNumber=5;
+    beginRandomNumber=2;
     trainIndex=[]
     posRandomNumber=random.sample(range(0,len(posUIndex)-1),beginRandomNumber)
     negRandomNumber=random.sample(range(0,len(negUIndex)-1),beginRandomNumber)
@@ -191,7 +195,7 @@ def refSVMtest():
     selector.addMusicIndex(trainIndex)
     print("Positive Index:",MusicHandler.posMusic)
     print("Negative Index:",MusicHandler.negMusic)
-    coXiter=8;
+    coXiter=4;
     print('coXiter:',coXiter)
     iterI=0;
     while iterI<coXiter:
@@ -440,9 +444,13 @@ def musicSimulatorAlpha(modelDir):
     
     player.displayHistory()
     classifier.saveClassifier()
-    
+
+
+
+
+dataViewPCA()    
 #musicCoWorktest()       
-refSVMtest()
+#refSVMvsCoWorkSVMTest()
 #musicCowork()
 #modelMaker()   
 #musicXorrRecommender()
