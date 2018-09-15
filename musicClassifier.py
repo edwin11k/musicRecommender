@@ -155,7 +155,7 @@ class MusicClassifier(MusicHandler):
                 if nIndex!=None:
                     negFeature.append(self.newFactory.musicFiles.mtFeatures[nIndex][bIndex-1:eIndex])
                 
-        ## zero= False, one= True
+        ## zero= True, one=false
         features.append(posFeature);features.append(negFeature)
         print('Features(positive,negative):',len(posFeature),len(negFeature))     
         features=featureStack(features)
@@ -282,4 +282,40 @@ class MusicClassifier(MusicHandler):
                 total+=1
         print("Value:",correct/total)
 
+        
+        
+    import seaborn as sns
+        
+    def mtFeaturePCA(self,mode="Full"):            
+        print("Features reduced to 2 dimension for viewing")
+        iDim=0;eDim=33
+        if mode=="Full":
+            iDim=0;eDim=33;size=33
+        if mode=="Tempolar":
+            iDim=0;eDim=8;size=8
+        if mode=="MFCC":
+            iDim=8;eDim=21;size=13
+        if mode=="Chromatic":
+            iDim=21;eDim=33;size=12
+        if mode=="MFCC_Chromatic":
+            iDim=8;eDim=33;size=25
             
+        mtFeatures=self.newFactory.musicFiles.mtFeatures
+        
+        mtIntFeatures=np.zeros((len(mtFeatures),size))
+        print(mtIntFeatures.shape)
+        for i,mem in enumerate(mtFeatures):
+            mtIntFeatures[i,:]=mem[iDim:eDim,0]
+            
+        print(mtIntFeatures)
+        from sklearn.decomposition import PCA
+        pca=PCA(n_components=2)
+        pca.fit(mtIntFeatures)  
+        print(pca)
+        self.mtFeaturesPCA=pca.transform(mtIntFeatures)
+        xData=[];yData=[]
+        for mem in self.mtFeaturesPCA:
+            xData.append(mem[0]);yData.append(mem[1])
+        plt.scatter(xData,yData,alpha=0.2)
+        
+        
