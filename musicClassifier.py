@@ -283,39 +283,34 @@ class MusicClassifier(MusicHandler):
         print("Value:",correct/total)
 
         
+   
         
-    import seaborn as sns
-        
-    def mtFeaturePCA(self,mode="Full"):            
-        print("Features reduced to 2 dimension for viewing")
-        iDim=0;eDim=33
+    def viewPCA(self,mode="Full"):  
+        xPdata=[];yPdata=[]
+        xNdata=[];yNdata=[]
         if mode=="Full":
-            iDim=0;eDim=33;size=33
+            features=self.newFactory.musicFiles.mtFeaturesFullPCA
         if mode=="Tempolar":
-            iDim=0;eDim=8;size=8
+            features=self.newFactory.musicFiles.mtFeaturesTempPCA
         if mode=="MFCC":
-            iDim=8;eDim=21;size=13
+            features=self.newFactory.musicFiles.mtFeaturesMFCCPCA
         if mode=="Chromatic":
-            iDim=21;eDim=33;size=12
+            features=self.newFactory.musicFiles.mtFeaturesChromaticPCA            
         if mode=="MFCC_Chromatic":
-            iDim=8;eDim=33;size=25
+            features=self.newFactory.musicFiles.mtFeaturesMFCCChromaticPCA
             
-        mtFeatures=self.newFactory.musicFiles.mtFeatures
+        Likes=self.newFactory.musicFiles.like    
+        for i,mem in enumerate(features):
+            if Likes[i]==True:
+                xPdata.append(mem[0]);yPdata.append(mem[1])
+            else:
+                xNdata.append(mem[0]);yNdata.append(mem[1])
+            
+        plt.scatter(xPdata,yPdata,color="red")
+        plt.scatter(xNdata,yNdata,color="blue")
         
-        mtIntFeatures=np.zeros((len(mtFeatures),size))
-        print(mtIntFeatures.shape)
-        for i,mem in enumerate(mtFeatures):
-            mtIntFeatures[i,:]=mem[iDim:eDim,0]
+        
             
-        print(mtIntFeatures)
-        from sklearn.decomposition import PCA
-        pca=PCA(n_components=2)
-        pca.fit(mtIntFeatures)  
-        print(pca)
-        self.mtFeaturesPCA=pca.transform(mtIntFeatures)
-        xData=[];yData=[]
-        for mem in self.mtFeaturesPCA:
-            xData.append(mem[0]);yData.append(mem[1])
-        plt.scatter(xData,yData,alpha=0.2)
+        
         
         
