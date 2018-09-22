@@ -22,7 +22,7 @@ coXiter=10;
 def dataViewPCA():
     print("Dimensional reduction & viewing the data")
     selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()
-    classifier.mtFeaturePCA(mode="Full")
+    classifier.viewPCA(mode="MFCC_Chromatic")
 
 
 def modelMaker():
