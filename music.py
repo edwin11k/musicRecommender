@@ -10,7 +10,7 @@ from pydub.playback import play
 from util import *
 import os
 import pickle
-
+from sklearn.decomposition import PCA
 
 playSong=True
 musicLikeInput=True;
@@ -99,13 +99,12 @@ class Music(object):
                 except:
                     print(file+" has passed")
             self.mtFeatureWhiten()
-            
+        self.mtfeaturesPCA2D()
  
 
     import numpy as np
     def mtFeatureWhiten(self):
-        print("Midterm features whitening")
-        
+        print("Midterm features whitening")    
         dim=len(self.mtFeatures[0])
         meanValue=np.zeros((dim,1))
         meanValue2=np.zeros((dim,1))
@@ -128,9 +127,65 @@ class Music(object):
         self.mtFeatures=newFeatures
         print("Whitened features saved!")
             
-            
-            
 
+    def mtfeaturesPCA2D(self):            
+        print("Features reduced to 2 dimension and save the data")
+        
+        """Original Mt Features """
+        mtFeatures=self.mtFeatures
+        
+        # Full Features
+        iDim=0;eDim=33;size=33
+        mtIntFeatures=np.zeros((len(mtFeatures),size))
+        for i,mem in enumerate(mtFeatures):
+            mtIntFeatures[i,:]=mem[iDim:eDim,0]
+        pca=PCA(n_components=2)
+        pca.fit(mtIntFeatures)  
+        self.mtFeaturesFullPCA=pca.transform(mtIntFeatures)
+        print("Full Features PCA Done")
+
+        # Tempolar Features
+        iDim=0;eDim=8;size=8
+        mtIntFeatures=np.zeros((len(mtFeatures),size))
+        for i,mem in enumerate(mtFeatures):
+            mtIntFeatures[i,:]=mem[iDim:eDim,0]     
+        pca=PCA(n_components=2)
+        pca.fit(mtIntFeatures)  
+        self.mtFeaturesTempPCA=pca.transform(mtIntFeatures)        
+        print("Tempolar Features PCA Done")
+        
+        # MFCC Features
+        iDim=8;eDim=21;size=13
+        mtIntFeatures=np.zeros((len(mtFeatures),size))    
+        for i,mem in enumerate(mtFeatures):
+            mtIntFeatures[i,:]=mem[iDim:eDim,0]    
+        pca=PCA(n_components=2)
+        pca.fit(mtIntFeatures)  
+        self.mtFeaturesMFCCPCA=pca.transform(mtIntFeatures)        
+        print("MFCC Features PCA Done")      
+        
+        # Chromatic Features
+        iDim=21;eDim=33;size=12
+        mtIntFeatures=np.zeros((len(mtFeatures),size))
+        for i,mem in enumerate(mtFeatures):
+            mtIntFeatures[i,:]=mem[iDim:eDim,0]
+        pca=PCA(n_components=2)
+        pca.fit(mtIntFeatures)  
+        self.mtFeaturesChromaticPCA=pca.transform(mtIntFeatures)        
+        print("Chromatic Features PCA Done")        
+        
+        # MFCC_Chromatic Features
+        iDim=8;eDim=33;size=25
+        mtIntFeatures=np.zeros((len(mtFeatures),size))
+        for i,mem in enumerate(mtFeatures):
+            mtIntFeatures[i,:]=mem[iDim:eDim,0]
+        pca=PCA(n_components=2)
+        pca.fit(mtIntFeatures)  
+        self.mtFeaturesMFCCChromaticPCA=pca.transform(mtIntFeatures)        
+        print("MFCC & Chromatic Features PCA Done")
+ 
+    
+        
 
     def __str__(self):   
         for i,mem in enumerate(self.fileInfo):
