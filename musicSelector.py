@@ -116,6 +116,7 @@ class MusicSelector(MusicHandler):
         return minIndex,maxIndex
                 
 
+    import matplotlib.pyplot as plt
     #find the data points that are the farthest from decision boundary
     def findMostOutDataPCA(self,indexPool,ML="SVMLinear",mode="MFCC"):
         print('Finding data points that are most distanced from decison boundary. Mode(',mode,')')
@@ -137,21 +138,19 @@ class MusicSelector(MusicHandler):
         for mem in MusicHandler.negMusic:
             if mem!=None and mem in fileIndex:
                 fileIndex.remove(mem)                
-        print('Hello! Current Mode:',mode)
-    
+  
         if ML=='SVMLinear':       
             minDist=100;maxDist=-100;minIndex=None;maxIndex=None;
                         
             for pIndex in fileIndex:        
                 testData=np.transpose(musicFeatures[pIndex])
                 dist=model.decision_function(testData)
-                #print(pIndex,dist)
-                             
                 if dist>maxDist and dist>0:
                     maxDist=dist;maxIndex=pIndex
                 if dist<minDist and dist<0:
                     minDist=dist;minIndex=pIndex
-        print(mode,minIndex,maxIndex)
+               
+        #print(mode,minIndex,maxIndex)
         return minIndex,maxIndex
 
                 
