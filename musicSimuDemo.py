@@ -122,7 +122,8 @@ def refSVMvsCoWorkSVMTest():
     print("SVM Training & Test")
     print()
     selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()    
-    print("TotalNumber of music in the folder:", selector.musicCount)     
+    print("TotalNumber of music in the folder:", selector.musicCount) 
+    
     #music index Pool
     indexU=list(range(0,selector.musicCount-1))
     
@@ -147,23 +148,21 @@ def refSVMvsCoWorkSVMTest():
     numOfPosTrain=20;numOfNegTrain=numOfPosTrain;   # total 21+21=42
     trainPosNum=random.sample(range(0,len(posUIndex)-1),numOfPosTrain)
     trainNegNum=random.sample(range(0,len(negUIndex)-1),numOfNegTrain)
-    
     print("Number of train samples: ",numOfPosTrain+numOfNegTrain)
     
-    # assign random training file from the pool
-    
+    # assign random training samples from the pool
     trainIndex=[]
     for mem in trainPosNum:
         trainIndex.append(posUIndex[mem])
     for mem in trainNegNum:
         trainIndex.append(negUIndex[mem])        
         
-    
     selector.addMusicIndex(trainIndex)
     #print(MusicHandler.posMusic,MusicHandler.negMusic)
     classifier.binaryClassifierPCA(mode='MFCC_Chromatic')
     classifier.saveClassifier()
     classifier.validateClassifierPCA(testIndex,mode='MFCC_Chromatic')
+    
  
     
     
@@ -174,7 +173,7 @@ def refSVMvsCoWorkSVMTest():
     ## Positive & Negative index from the pool UIndex
         
        
-    beginRandomNumber=2;
+    beginRandomNumber=6;
     trainIndex=[]
     posRandomNumber=random.sample(range(0,len(posUIndex)-1),beginRandomNumber)
     negRandomNumber=random.sample(range(0,len(negUIndex)-1),beginRandomNumber)
@@ -184,6 +183,7 @@ def refSVMvsCoWorkSVMTest():
     print("Positive Random Number",posRandomNumber)
     print("Negative Random Number",negRandomNumber)
      
+    ## pick same number of samples from pool & remove the samples from the pool
     for mem in posRandomNumber:
         trainIndex.append(posUIndex[mem]);indexU.remove(posUIndex[mem])
     for mem in negRandomNumber:
@@ -196,8 +196,8 @@ def refSVMvsCoWorkSVMTest():
     selector.addMusicIndex(trainIndex)
     print("Positive Index:",MusicHandler.posMusic)
     print("Negative Index:",MusicHandler.negMusic)
-    coXiter=4;
-    print('coXiter:',coXiter)
+    coXiter=7;
+    print('Iteration Number :',coXiter)
     iterI=0;
     while iterI<coXiter:
         ## MFCC Data Addition
@@ -220,10 +220,11 @@ def refSVMvsCoWorkSVMTest():
             MusicSelector.posMusic.append(maxChromaIndex);indexU.remove(maxChromaIndex)        
         print("Positive Index:",MusicHandler.posMusic);print("Negative Index:",MusicHandler.negMusic)
         iterI+=1
-        
+    print("Co work train sample number:",len(MusicHandler.posMusic)+len(MusicHandler.negMusic))
     classifier.binaryClassifierPCA(mode='MFCC_Chromatic')
     classifier.saveClassifier()
-    classifier.validateClassifierPCA(testIndex,mode='MFCC_Chromatic')        
+    classifier.validateClassifierPCA(testIndex,mode='MFCC_Chromatic')    
+    print(classifier.validateResult)    
 
     
             
