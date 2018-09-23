@@ -156,13 +156,10 @@ class MusicClassifier(MusicHandler):
                     negFeature.append(self.newFactory.musicFiles.mtFeaturesMFCCChromaticPCA[pIndex])
                 else:
                     print("Please enter valid mode")
-                
-           
+                        
         features.append(posFeature);features.append(negFeature)
-        #print(features)
         print(len(features),features[0][0].shape,features[1][0].shape)
         features=featureStack(features)
-        #print(features[0].shape,features[1].shape)
         
         
         if self.MLAlgorithm=='SVM_RBF':
@@ -357,8 +354,7 @@ class MusicClassifier(MusicHandler):
             if model=="Chromatic":
                 pickle.dump(MusicHandler.modelChromatic,fid)
             if model=="MFCC":
-                pickle.dump(MusicHandler.modelMFCC,fid)
-            
+                pickle.dump(MusicHandler.modelMFCC,fid)    
         print(' Model Has been Saved')         
         
     
@@ -403,12 +399,8 @@ class MusicClassifier(MusicHandler):
         total=0;correct=0
         for i,feature in enumerate(features):
             if i in testIndex:        
-                #print(features[i][0:34].reshape(1,-1))
-                #result[i]=self.model.predict(features[i][0:34].reshape(1,-1))
-                #print(i,self.newFactory.musicFiles.like[i])
                 if(self.newFactory.musicFiles.like[i]==classifierModel.predict(features[i][begin:end].reshape(1,-1))):
                     correct+=1
-                    print(self.newFactory.musicFiles.like[i],classifierModel.predict(features[i][begin:end].reshape(1,-1)))
                 total+=1
         print("Value:",correct/total)
 
@@ -428,10 +420,10 @@ class MusicClassifier(MusicHandler):
         for i,feature in enumerate(features):
             if i in testIndex:        
                 if(self.newFactory.musicFiles.like[i]==classifierModel.predict(features[i].reshape(1,-1))):
-                    correct+=1
-                    print(self.newFactory.musicFiles.like[i],classifierModel.predict(features[i].reshape(1,-1)))
+                    correct+=1  
                 total+=1
-        print("Value:",correct/total)       
+        print("Value:",correct/total)   
+        self.validateResult.append(correct/total)
    
         
         
