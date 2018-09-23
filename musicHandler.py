@@ -29,6 +29,7 @@ class MusicHandler(object):
     xorrValueDic={}
     xorrAbsValueDic={}
     
+    validateResult=[]
     #Classifier Models
     modelMFCC=None;
     modelChromatic=None;
