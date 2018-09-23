@@ -90,24 +90,24 @@ class MusicClassifier(MusicHandler):
         if MusicHandler.posMusic:
             for pIndex in MusicHandler.posMusic:
                 if mode==None:
-                    posFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])    
+                    posFeature.append(self.newFactory.musicFiles.mtFeatures[pIndex])    
                 elif mode=='MFCC_Chromatic':
-                    posFeature.append(self.newFactory.musicFiles.stFeatures[pIndex][8:33])   
+                    posFeature.append(self.newFactory.musicFiles.mtFeatures[pIndex][8:33])   
                 else:
                     print("Please enter valid mode");
                     
         if MusicHandler.negMusic:
             for nIndex in MusicHandler.negMusic:  
                 if mode==None:
-                    negFeature.append(self.newFactory.musicFiles.stFeatures[pIndex])
+                    negFeature.append(self.newFactory.musicFiles.mtFeatures[pIndex])
                 elif mode=='MFCC_Chromatic':
-                    negFeature.append(self.newFactory.musicFiles.stFeatures[pIndex][8:33])
+                    negFeature.append(self.newFactory.musicFiles.mtFeatures[pIndex][8:33])
                 else:
                     print("Please enter valid mode")
                 
-              
-        
-        features.append(negFeature);features.append(posFeature)
+        features.append(posFeature);features.append(negFeature)
+        #print(features)
+        print(len(features),features[0][0].shape,features[1][0].shape)
         features=featureStack(features)
         #print(features[0].shape,features[1].shape)
                     
@@ -131,6 +131,60 @@ class MusicClassifier(MusicHandler):
             print('Extra Trees Classifier')
             self.model=trainExtraTrees(features,100)
             
+            
+            
+
+    """ Vanilla binary Classifier using 2D PCA reduced data"""
+    def binaryClassifierPCA(self,mode=None):
+        self.MLAlgorithm='SVM'
+        
+        posFeature=[];negFeature=[];features=[]
+        if MusicHandler.posMusic:
+            for pIndex in MusicHandler.posMusic:
+                if mode==None:
+                    posFeature.append(self.newFactory.musicFiles.mtFeaturesFullPCA[pIndex])    
+                elif mode=='MFCC_Chromatic':
+                    posFeature.append(self.newFactory.musicFiles.mtFeaturesMFCCChromaticPCA[pIndex])   
+                else:
+                    print("Please enter valid mode");
+                    
+        if MusicHandler.negMusic:
+            for nIndex in MusicHandler.negMusic:  
+                if mode==None:
+                    negFeature.append(self.newFactory.musicFiles.mtFeaturesFullPCA[pIndex])
+                elif mode=='MFCC_Chromatic':
+                    negFeature.append(self.newFactory.musicFiles.mtFeaturesMFCCChromaticPCA[pIndex])
+                else:
+                    print("Please enter valid mode")
+                
+           
+        features.append(posFeature);features.append(negFeature)
+        #print(features)
+        print(len(features),features[0][0].shape,features[1][0].shape)
+        features=featureStack(features)
+        #print(features[0].shape,features[1].shape)
+        
+        
+        if self.MLAlgorithm=='SVM_RBF':
+            print('SVM RBF Classifier')
+            self.model=trainSVM_RBF(features,0.1)
+        
+        if self.MLAlgorithm=='SVM':
+            print('SVM Linear Classifier')
+            self.model=trainSVM(features,0.1)
+            
+        if self.MLAlgorithm=='RandomForest':
+            print('Random Forest Classifier')
+            self.model=trainRandomForest(features,100)
+        
+        if self.MLAlgorithm=='GradientBoosting':
+            print('Gradient Boosting Classifier')
+            self.model=trainGradientBoosting(features,100)
+        
+        if self.MLAlgorithm=='ExtraTrees':
+            print('Extra Trees Classifier')
+            self.model=trainExtraTrees(features,100)
+
 
     
     """ Binary co Work Classifier """
@@ -211,7 +265,83 @@ class MusicClassifier(MusicHandler):
                 
                 
                 
+    
+    """ Binary co Work Classifier """
+    def binaryCoMLClassifierPCA(self,mode='MFCC',MLAlgorithm='SVM_Linear'):
+        #self.posMusic=[4];self.negMusic=[1,2]
+        posFeature=[];negFeature=[];features=[]
+        
+        if mode=='MFCC':
+            musicFeatures=self.newFactory.musicFiles.mtFeaturesMFCCPCA
+        if mode=='Chromatic':
+            musicFeatures=self.newFactory.musicFiles.mtFeaturesChromaticPCA
+        if mode=='Tempolar':
+            musicFeatures=self.newFactory.musicFiles.mtFeaturesTempPCA
             
+        if MusicHandler.posMusic:
+            for pIndex in MusicHandler.posMusic:
+                if pIndex!=None:
+                    posFeature.append(musicFeatures[pIndex])
+                                      
+        if MusicHandler.negMusic:
+            for nIndex in MusicHandler.negMusic: 
+                if nIndex!=None:
+                    negFeature.append(musicFeatures[pIndex])
+                
+        ## zero= True, one=false
+        features.append(posFeature);features.append(negFeature)
+        print('Features(positive,negative):',len(posFeature),len(negFeature))     
+        features=featureStack(features)
+        
+        if MLAlgorithm=='SVM_RBF':
+            print('SVM RBF Classifier')
+            if mode=='MFCC':
+                MusicHandler.modelMFCC=trainSVM_RBF(features,0.1)
+            if mode=='Chromatic':
+                MusicHandler.modelChromatic=trainSVM_RBF(features,0.1)
+            if mode=='Tempolar':
+                MusicHandler.modelTempolar=trainSVM_RBF(features,0.1)
+            
+                
+        if MLAlgorithm=='SVM_Linear':    
+            if mode=='MFCC':
+                MusicHandler.modelMFCC=trainSVM(features,0.1)
+                print('SVM Linear Classifier with MFCC features')
+            if mode=='Chromatic':
+                MusicHandler.modelChromatic=trainSVM(features,0.1)
+                print('SVM Linear Classifier with Chromatic features')
+            if mode=='Tempolar':
+                MusicHandler.modelTempolar=trainSVM(features,0.1)
+                print('SVM Linear Classifier with Tempolar features')
+                
+        if MLAlgorithm=='RandomForest':
+            print('Random Forest Classifier')
+            if mode=='MFCC':
+                MusicHandler.modelMFCC=trainRandomForest(features,100)
+            if mode=='Chromatic':
+                MusicHandler.modelChromatic=trainRandomForest(features,100)
+            if mode=='Tempolar':
+                MusicHandler.modelTempolar=trainRandomForest(features,100)
+
+        if MLAlgorithm=='GradientBoosting':
+            print('Gradient Boosting Classifier')
+            if mode=='MFCC':
+                MusicHandler.modelMFCC=trainGradientBoosting(features,100)
+            if mode=='Chromatic':
+                MusicHandler.modelChromatic=trainGradientBoosting(features,100)
+            if mode=='Tempolar':
+                MusicHandler.modelTempolar=trainGradientBoosting(features,100)
+                
+
+        if MLAlgorithm=='ExtraTrees':
+            print('Extra Trees Classifier')
+            if mode=='MFCC':
+                MusicHandler.modelMFCC=trainExtraTrees(features,100)
+            if mode=='Chromatic':
+                MusicHandler.modelChromatic=trainExtraTrees(features,100)
+            if mode=='Tempolar':
+                MusicHandler.modelTempolar=trainExtraTrees(features,100)
+                            
 
 
     def saveClassifier(self,modelString=None,model=None):
@@ -282,8 +412,28 @@ class MusicClassifier(MusicHandler):
                 total+=1
         print("Value:",correct/total)
 
+ 
+    def validateClassifierPCA(self,testIndex,mode=None):   
+        classifierModel=None
+        if mode==None:
+            classifierModel=self.model;features=self.newFactory.musicFiles.mtFeaturesFullPCA
+        elif mode=="MFCC_Chromatic":
+            classifierModel=self.model;features=self.newFactory.musicFiles.mtFeaturesMFCCChromaticPCA
+        elif mode=='MFCC':
+            classifierModel=MusicHandler.modelMFCC;features=self.newFactory.musicFiles.mtFeaturesMFCCPCA
+        elif mode=='Chromatic':
+            classifierModel=MusicHandler.modelChromatic;features=self.newFactory.musicFiles.mtFeaturesChromaticPCA
         
+        total=0;correct=0
+        for i,feature in enumerate(features):
+            if i in testIndex:        
+                if(self.newFactory.musicFiles.like[i]==classifierModel.predict(features[i].reshape(1,-1))):
+                    correct+=1
+                    print(self.newFactory.musicFiles.like[i],classifierModel.predict(features[i].reshape(1,-1)))
+                total+=1
+        print("Value:",correct/total)       
    
+        
         
     def viewPCA(self,mode="Full"):  
         xPdata=[];yPdata=[]
