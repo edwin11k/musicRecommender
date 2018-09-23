@@ -161,10 +161,11 @@ def refSVMvsCoWorkSVMTest():
     
     selector.addMusicIndex(trainIndex)
     #print(MusicHandler.posMusic,MusicHandler.negMusic)
-    classifier.binaryClassifier(mode='MFCC_Chromatic')
+    classifier.binaryClassifierPCA(mode='MFCC_Chromatic')
     classifier.saveClassifier()
-    classifier.validateClassifier(testIndex,mode='MFCC_Chromatic')
+    classifier.validateClassifierPCA(testIndex,mode='MFCC_Chromatic')
  
+    
     
     ''' CoWork Test. Do not use previous train test '''
     print("Co Work Test Using SVM: Two Features Group")
@@ -200,8 +201,8 @@ def refSVMvsCoWorkSVMTest():
     iterI=0;
     while iterI<coXiter:
         ## MFCC Data Addition
-        classifier.binaryCoMLClassifier(mode='MFCC',MLAlgorithm='SVM_Linear') 
-        minMFCCIndex,maxMFCCIndex=selector.findMostOutData(indexU,ML='SVMLinear',mode='MFCC')
+        classifier.binaryCoMLClassifierPCA(mode='MFCC',MLAlgorithm='SVM_Linear') 
+        minMFCCIndex,maxMFCCIndex=selector.findMostOutDataPCA(indexU,ML='SVMLinear',mode='MFCC')
         print(minMFCCIndex,maxMFCCIndex)
         if minMFCCIndex!=None:
             MusicSelector.negMusic.append(minMFCCIndex);indexU.remove(minMFCCIndex)
@@ -210,8 +211,8 @@ def refSVMvsCoWorkSVMTest():
         print("Positive Index:",MusicHandler.posMusic);print("Negative Index:",MusicHandler.negMusic)
         
         ## Chromatic Data Addition
-        classifier.binaryCoMLClassifier(mode='Chromatic',MLAlgorithm='SVM_Linear')
-        minChromaIndex,maxChromaIndex=selector.findMostOutData(indexU,ML='SVMLinear',mode='Chromatic')
+        classifier.binaryCoMLClassifierPCA(mode='Chromatic',MLAlgorithm='SVM_Linear')
+        minChromaIndex,maxChromaIndex=selector.findMostOutDataPCA(indexU,ML='SVMLinear',mode='Chromatic')
         print(minChromaIndex,maxChromaIndex)
         if minChromaIndex!=None:
             MusicSelector.negMusic.append(minChromaIndex);indexU.remove(minChromaIndex)
@@ -220,11 +221,10 @@ def refSVMvsCoWorkSVMTest():
         print("Positive Index:",MusicHandler.posMusic);print("Negative Index:",MusicHandler.negMusic)
         iterI+=1
         
-    classifier.binaryClassifier(mode='MFCC_Chromatic')
+    classifier.binaryClassifierPCA(mode='MFCC_Chromatic')
     classifier.saveClassifier()
-    classifier.validateClassifier(testIndex,mode='MFCC_Chromatic')        
-        
-        
+    classifier.validateClassifierPCA(testIndex,mode='MFCC_Chromatic')        
+
     
             
 def musicCoWorktest(testIndex,Uindex):
@@ -448,9 +448,9 @@ def musicSimulatorAlpha(modelDir):
 
 
 
-dataViewPCA()    
+#dataViewPCA()    
 #musicCoWorktest()       
-#refSVMvsCoWorkSVMTest()
+refSVMvsCoWorkSVMTest()
 #musicCowork()
 #modelMaker()   
 #musicXorrRecommender()
