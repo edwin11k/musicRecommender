@@ -11,6 +11,10 @@ from pyAudioAnalysis.audioFeatureExtraction import *
 from util import *
 import pickle
 import os
+from sklearn.gaussian_process.kernels import RBF
+from sklearn.gaussian_process import GaussianProcessClassifier
+import numpy 
+import math
 
 ## If set true, use a single mean data of features in 34 dimension instead of 500 data points.
 useMean=True;
@@ -83,14 +87,13 @@ class MusicClassifier(MusicHandler):
 
 
     """ Vanilla binary Classifier"""
-    def binaryClassifier(self,mode=None):
-        self.MLAlgorithm='SVM'
-        
+    def binaryClassifier(self,mode=None,ML='SVM'):
+    
         posFeature=[];negFeature=[];features=[]
         if MusicHandler.posMusic:
             for pIndex in MusicHandler.posMusic:
                 if mode==None:
-                    posFeature.append(self.newFactory.musicFiles.mtFeatures[pIndex])    
+                    posFeature.append(self.newFactory.musicFiles.mtFeatures[pIndex][:33])    
                 elif mode=='MFCC_Chromatic':
                     posFeature.append(self.newFactory.musicFiles.mtFeatures[pIndex][8:33])   
                 else:
@@ -99,7 +102,7 @@ class MusicClassifier(MusicHandler):
         if MusicHandler.negMusic:
             for nIndex in MusicHandler.negMusic:  
                 if mode==None:
-                    negFeature.append(self.newFactory.musicFiles.mtFeatures[pIndex])
+                    negFeature.append(self.newFactory.musicFiles.mtFeatures[pIndex][:33])
                 elif mode=='MFCC_Chromatic':
                     negFeature.append(self.newFactory.musicFiles.mtFeatures[pIndex][8:33])
                 else:
@@ -107,27 +110,27 @@ class MusicClassifier(MusicHandler):
                 
         features.append(posFeature);features.append(negFeature)
         #print(features)
-        print(len(features),features[0][0].shape,features[1][0].shape)
+        #print(len(features),features[0][0].shape,features[1][0].shape)
         features=featureStack(features)
         #print(features[0].shape,features[1].shape)
                     
-        if self.MLAlgorithm=='SVM_RBF':
+        if ML=='SVM_RBF':
             print('SVM RBF Classifier')
             self.model=trainSVM_RBF(features,0.1)
         
-        if self.MLAlgorithm=='SVM':
+        if ML=='SVM':
             print('SVM Linear Classifier')
             self.model=trainSVM(features,0.1)
             
-        if self.MLAlgorithm=='RandomForest':
+        if ML=='RandomForest':
             print('Random Forest Classifier')
             self.model=trainRandomForest(features,100)
         
-        if self.MLAlgorithm=='GradientBoosting':
+        if ML=='GradientBoosting':
             print('Gradient Boosting Classifier')
             self.model=trainGradientBoosting(features,100)
         
-        if self.MLAlgorithm=='ExtraTrees':
+        if ML=='ExtraTrees':
             print('Extra Trees Classifier')
             self.model=trainExtraTrees(features,100)
             
@@ -158,7 +161,7 @@ class MusicClassifier(MusicHandler):
                     print("Please enter valid mode")
                         
         features.append(posFeature);features.append(negFeature)
-        print(len(features),features[0][0].shape,features[1][0].shape)
+        #(len(features),features[0][0].shape,features[1][0].shape)
         features=featureStack(features)
         
         
@@ -388,7 +391,7 @@ class MusicClassifier(MusicHandler):
     def validateClassifier(self,testIndex,mode=None):   
         classifierModel=None
         if mode==None:
-            begin=0;end=34;classifierModel=self.model
+            begin=0;end=33;classifierModel=self.model
         elif mode=="MFCC_Chromatic":
             begin=8;end=33;classifierModel=self.model
         elif mode=='MFCC':
@@ -396,6 +399,7 @@ class MusicClassifier(MusicHandler):
         elif mode=='Chromatic':
             begin=21;end=33;classifierModel=MusicHandler.modelChromatic
         features=self.newFactory.musicFiles.mtFeatures
+        
         total=0;correct=0
         for i,feature in enumerate(features):
             if i in testIndex:        
@@ -452,7 +456,143 @@ class MusicClassifier(MusicHandler):
         plt.scatter(xNdata,yNdata,color="blue")
         
         
+    def nParamClassify(self,testIndex,rCircle=10):
+        print("Find Proximate Data for weighted averaging")
+        trainIndex=self.posMusic+self.negMusic
+        features=self.newFactory.musicFiles.mtFeatures
+        likes=self.newFactory.musicFiles.like
+        correct=0;total=0
+        for testMem in testIndex:
+            circleMem=[];memWeight=[]
+            for trainMem in trainIndex:
+                testFeature=features[testMem][:33]
+                trainFeature=features[trainMem][:33]
+                dist=self.featureDist(testFeature,trainFeature)
+                if dist<rCircle:
+                    circleMem.append(trainMem)
+                    memWeight.append(dist)
+                    
+                      
+            if(len(circleMem)<1):
+                print("No data in cirlcle")
+            else:
+                #Normalize
+                memWeight=memWeight/sum(memWeight)
+                expectSum=0
+                for i,mem in enumerate(circleMem):
+                    if likes[mem]==True:
+                        expectSum+=memWeight[i]
+                    else:
+                        expectSum-=memWeight[i]
+                if expectSum>0:
+                    if likes[testMem]==True:
+                        correct+=1;total+=1
+                    else:
+                        total+=1
+                else:
+                    if likes[testMem]==False:
+                        correct+=1;total+=1
+                    else:
+                        total+=1
+        print("Correct/Total:",correct,total,correct/total)
+                    
             
+                
+        
+
+    def nParamClassify2(self,testIndex,rCircle=0.1):
+        print("Find Proximate Data for weighted averaging:Adding 2nd Order")
+        trainIndex=self.posMusic+self.negMusic
+        features=self.newFactory.musicFiles.mtFeatures
+        likes=self.newFactory.musicFiles.like
+        correct=0;total=0
+        for testMem in testIndex:
+            circleMem=[];memWeight=[]
+            for trainMem in trainIndex:
+                testFeature=features[testMem][:33]
+                trainFeature=features[trainMem][:33]
+                dist=self.featureDist(testFeature,trainFeature)
+                if dist<rCircle:
+                    circleMem.append(trainMem)
+                    
+                    """ adding 2nd order """ 
+                    for trainMem2 in trainIndex:
+                        trainFeature2=features[trainMem][:33]
+                        dist2=self.featureDist(trainFeature,trainFeature2)
+                        if trainMem!=trainMem2 and dist2<rCircle:
+                            dist+=dist*dist2
+                    memWeight.append(dist)
+                                
+            if(len(circleMem)<1):
+                print("No data in cirlcle")
+            else:
+                #Normalize
+                memWeight=memWeight/sum(memWeight)
+                expectSum=0
+                for i,mem in enumerate(circleMem):
+                    if likes[mem]==True:
+                        expectSum+=memWeight[i]
+                    else:
+                        expectSum-=memWeight[i]
+                if expectSum>0:
+                    if likes[testMem]==True:
+                        correct+=1;total+=1
+                    else:
+                        total+=1
+                else:
+                    if likes[testMem]==False:
+                        correct+=1;total+=1
+                    else:
+                        total+=1
+        print("Correct/Total:",correct,total,correct/total)
+            
+            
+   
+    def featureDist(self,feature1,feature2):
+        featureSum=0
+        size1=len(feature1)
+        for i in range(0,size1):
+            featureSum+=(feature1[i]-feature2[i])*(feature1[i]-feature2[i])
+        return math.exp(-math.sqrt(featureSum))
+            
+        
+   
+
+    
+        
+
+    def gaussianProcessClassifier(self,testIndex):        
+        print("Gaussian Process Training Perform")
+        kernel=1.0*RBF(1.0)
+        trainIndex=self.posMusic+self.negMusic
+        features=self.newFactory.musicFiles.mtFeatures
+        likes=self.newFactory.musicFiles.like
+        X1=numpy.zeros((len(trainIndex),len(features[0][:33])))
+        y1=[]
+        for i,mem in enumerate(trainIndex):
+            X1[i,:]=squeeze(features[mem][:33])
+            if likes[mem]==True:
+                y1.append(0)
+            else:
+                y1.append(1)
+        gpc=GaussianProcessClassifier(kernel=kernel,random_state=0).fit(X1,y1)
+        
+        X2=numpy.zeros((len(testIndex),len(features[0][:33])))
+        for i,mem in enumerate(testIndex):
+            X2[i,:]=squeeze(features[mem][:33])
+            
+        result=gpc.predict(X2)
+        correct=0;total=0
+        for i,mem in enumerate(result):
+            if mem==0 and likes[testIndex[i]]==True:
+                correct+=1;total+=1
+            elif mem==1 and likes[testIndex[i]]==False:
+                correct+=1;total+=1
+            else:
+                total+=1
+        print("correct/total",correct,total,correct/total)
+        
+        
         
         
         
