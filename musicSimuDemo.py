@@ -19,10 +19,54 @@ coXiter=10;
 
 
 
+
+def nonParametricTest():
+    print("Non-parametric Model")
+    ## Reference SVM test to compare with
+
+    selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()    
+    print("TotalNumber of music in the folder:", selector.musicCount) 
+    
+    """ Divide data into Test and Training"""
+    """-----------------------------------------------------------------------"""
+    #music index Pool
+    indexU=list(range(0,selector.musicCount-1))
+    
+    # Assign random test file from the pool
+    numOfTestSample=60;print("Number of test samples: ",numOfTestSample)
+    testIndex=random.sample(range(0,selector.musicCount-1),numOfTestSample)
+    
+    # remove testing file from the pool
+    trainIndex=indexU
+    for mem in testIndex:
+        if mem in indexU:
+            trainIndex.remove(mem)
+            
+    selector.addMusicIndex(trainIndex)
+    
+
+    """-----------------------------------------------------------------------"""
+    classifier.binaryClassifier(ML='SVM')
+    classifier.validateClassifier(testIndex)    
+    """----------------------------------------------------------------------"""
+    classifier.binaryClassifier(ML='SVM_RBF')
+    classifier.validateClassifier(testIndex)    
+    """----------------------------------------------------------------------""" 
+    classifier.nParamClassify(testIndex)
+    #classifier.nParamClassify2(testIndex)
+    """-----------------------------------------------------------------------"""
+    classifier.gaussianProcessClassifier(testIndex)
+ 
+    
+
+
+
+    
+
 def dataViewPCA():
     print("Dimensional reduction & viewing the data")
     selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()
-    classifier.viewPCA(mode="MFCC_Chromatic")
+    classifier.viewPCA(mode="Full")
 
 
 def modelMaker():
@@ -124,6 +168,8 @@ def refSVMvsCoWorkSVMTest():
     selector=MusicSelector();player=MusicPlayer();classifier=MusicClassifier()    
     print("TotalNumber of music in the folder:", selector.musicCount) 
     
+    """ Divide data into Test and Training"""
+    """-----------------------------------------------------------------------"""
     #music index Pool
     indexU=list(range(0,selector.musicCount-1))
     
@@ -144,8 +190,9 @@ def refSVMvsCoWorkSVMTest():
         if MusicHandler.newFactory.musicFiles.like[mem]==False:
             negUIndex.append(mem)    
       
-    # for each response, select same number of samples
-    numOfPosTrain=20;numOfNegTrain=numOfPosTrain;   # total 21+21=42
+    """-----------------------------------------------------------------------"""
+    """ Reference comparison """
+    numOfPosTrain=20;numOfNegTrain=numOfPosTrain;   # total 20+20=40
     trainPosNum=random.sample(range(0,len(posUIndex)-1),numOfPosTrain)
     trainNegNum=random.sample(range(0,len(negUIndex)-1),numOfNegTrain)
     print("Number of train samples: ",numOfPosTrain+numOfNegTrain)
@@ -163,8 +210,8 @@ def refSVMvsCoWorkSVMTest():
     classifier.saveClassifier()
     classifier.validateClassifierPCA(testIndex,mode='MFCC_Chromatic')
     
- 
-    
+   
+    """-------------------------------------------------------------------------"""
     
     ''' CoWork Test. Do not use previous train test '''
     print("Co Work Test Using SVM: Two Features Group")
@@ -173,7 +220,7 @@ def refSVMvsCoWorkSVMTest():
     ## Positive & Negative index from the pool UIndex
         
        
-    beginRandomNumber=6;
+    beginRandomNumber=8;
     trainIndex=[]
     posRandomNumber=random.sample(range(0,len(posUIndex)-1),beginRandomNumber)
     negRandomNumber=random.sample(range(0,len(negUIndex)-1),beginRandomNumber)
@@ -196,7 +243,7 @@ def refSVMvsCoWorkSVMTest():
     selector.addMusicIndex(trainIndex)
     print("Positive Index:",MusicHandler.posMusic)
     print("Negative Index:",MusicHandler.negMusic)
-    coXiter=7;
+    coXiter=6
     print('Iteration Number :',coXiter)
     iterI=0;
     while iterI<coXiter:
@@ -205,9 +252,9 @@ def refSVMvsCoWorkSVMTest():
         minMFCCIndex,maxMFCCIndex=selector.findMostOutDataPCA(indexU,ML='SVMLinear',mode='MFCC')
         print(minMFCCIndex,maxMFCCIndex)
         if minMFCCIndex!=None:
-            MusicSelector.negMusic.append(minMFCCIndex);indexU.remove(minMFCCIndex)
+            MusicSelector.posMusic.append(minMFCCIndex);indexU.remove(minMFCCIndex)
         if maxMFCCIndex!=None:
-            MusicSelector.posMusic.append(maxMFCCIndex);indexU.remove(maxMFCCIndex)
+            MusicSelector.negMusic.append(maxMFCCIndex);indexU.remove(maxMFCCIndex)
         print("Positive Index:",MusicHandler.posMusic);print("Negative Index:",MusicHandler.negMusic)
         
         ## Chromatic Data Addition
@@ -215,16 +262,16 @@ def refSVMvsCoWorkSVMTest():
         minChromaIndex,maxChromaIndex=selector.findMostOutDataPCA(indexU,ML='SVMLinear',mode='Chromatic')
         print(minChromaIndex,maxChromaIndex)
         if minChromaIndex!=None:
-            MusicSelector.negMusic.append(minChromaIndex);indexU.remove(minChromaIndex)
+            MusicSelector.posMusic.append(minChromaIndex);indexU.remove(minChromaIndex)
         if maxChromaIndex!=None:
-            MusicSelector.posMusic.append(maxChromaIndex);indexU.remove(maxChromaIndex)        
+            MusicSelector.negMusic.append(maxChromaIndex);indexU.remove(maxChromaIndex)        
         print("Positive Index:",MusicHandler.posMusic);print("Negative Index:",MusicHandler.negMusic)
         iterI+=1
     print("Co work train sample number:",len(MusicHandler.posMusic)+len(MusicHandler.negMusic))
     classifier.binaryClassifierPCA(mode='MFCC_Chromatic')
     classifier.saveClassifier()
     classifier.validateClassifierPCA(testIndex,mode='MFCC_Chromatic')    
-    print(classifier.validateResult)    
+    print(classifier.validateResult)  
 
     
             
@@ -449,9 +496,10 @@ def musicSimulatorAlpha(modelDir):
 
 
 
+nonParametricTest()
 #dataViewPCA()    
 #musicCoWorktest()       
-refSVMvsCoWorkSVMTest()
+#refSVMvsCoWorkSVMTest()
 #musicCowork()
 #modelMaker()   
 #musicXorrRecommender()
