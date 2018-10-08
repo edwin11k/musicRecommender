@@ -9,6 +9,8 @@ from musicHandler import *
 import random 
 
 
+
+
 class MusicSelector(MusicHandler):
     
     #Randomly select an index that are not selected before which are contained either posMusic or negMusic
@@ -131,7 +133,8 @@ class MusicSelector(MusicHandler):
             model=MusicHandler.modelTempolar
             musicFeatures=self.newFactory.musicFiles.mtFeaturesTempPCA
                    
-        fileIndex=indexPool  # Training data pool,
+        """ Remove selected training data from index pool """
+        fileIndex=indexPool  
         for mem in MusicHandler.posMusic:
             if mem!=None and mem in fileIndex:
                 fileIndex.remove(mem)                            
@@ -141,15 +144,41 @@ class MusicSelector(MusicHandler):
   
         if ML=='SVMLinear':       
             minDist=100;maxDist=-100;minIndex=None;maxIndex=None;
-                        
             for pIndex in fileIndex:        
                 testData=np.transpose(musicFeatures[pIndex])
+               
                 dist=model.decision_function(testData)
                 if dist>maxDist and dist>0:
                     maxDist=dist;maxIndex=pIndex
                 if dist<minDist and dist<0:
                     minDist=dist;minIndex=pIndex
                
+        """ Min and max are confusing: Test on training data to determine """
+        posMin=0;posMax=0;
+        for posIndex in MusicHandler.posMusic:
+            posData=np.transpose(musicFeatures[posIndex])
+            dist=model.decision_function(posData)
+            if dist<0:
+                posMin+=1
+            else:
+                posMax+=1
+        
+        negMin=0;negMax=0
+        for negIndex in MusicHandler.negMusic:
+            negData=np.transpose(musicFeatures[negIndex])
+            dist=model.decision_function(negData)
+            if dist<0:
+                negMin+=1
+            else:
+                negMax+=1
+        """--------------------------------------------------------------"""
+        print("posMin,posMax:",posMin,posMax)
+        print("negMin,negMax:",negMin,negMax)
+        if (posMin/(posMin+posMax))>(negMin/(negMin+negMax)):
+            return minIndex,maxIndex
+        else:
+            return maxIndex,minIndex
+        
         #print(mode,minIndex,maxIndex)
         return minIndex,maxIndex
 
@@ -163,6 +192,8 @@ class MusicSelector(MusicHandler):
                 self.negMusic.append(mem)
 
         
-
+    def viewMusicIndex(self):
+        print("Positive Index:",self.posMusic)
+        print("Negative Index:",self.negMusic)
 
     
