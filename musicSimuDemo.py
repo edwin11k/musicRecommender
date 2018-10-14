@@ -4,7 +4,7 @@ Created on Sat Feb 17 10:57:37 2018
 
 @author: edwin
 """
-
+import deepgp
 from musicClassifier import *
 from musicPlayer import *
 from musicSelector import *
@@ -46,16 +46,17 @@ def nonParametricTest():
     
 
     """-----------------------------------------------------------------------"""
-    classifier.binaryClassifier(ML='SVM')
-    classifier.validateClassifier(testIndex)    
+    #classifier.binaryClassifier(ML='SVM')
+    #classifier.validateClassifier(testIndex)    
     """----------------------------------------------------------------------"""
-    classifier.binaryClassifier(ML='SVM_RBF')
-    classifier.validateClassifier(testIndex)    
+    #classifier.binaryClassifier(ML='SVM_RBF')
+    #classifier.validateClassifier(testIndex)    
     """----------------------------------------------------------------------""" 
-    classifier.nParamClassify(testIndex)
+    #classifier.nParamClassify(testIndex)
     #classifier.nParamClassify2(testIndex)
     """-----------------------------------------------------------------------"""
-    classifier.gaussianProcessClassifier(testIndex)
+    #classifier.gaussianProcessClassifier(testIndex)
+    classifier.deepGaussianProcessClassifier(testIndex)
  
     
 
