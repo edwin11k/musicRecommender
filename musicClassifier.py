@@ -15,6 +15,8 @@ from sklearn.gaussian_process.kernels import RBF
 from sklearn.gaussian_process import GaussianProcessClassifier
 import numpy 
 import math
+import deepgp
+import GPy
 
 ## If set true, use a single mean data of features in 34 dimension instead of 500 data points.
 useMean=True;
@@ -594,5 +596,39 @@ class MusicClassifier(MusicHandler):
         
         
         
+        
+    def deepGaussianProcessClassifier(self,testIndex):        
+        print("Deep Gaussian Process Classification")      
+        trainIndex=self.posMusic+self.negMusic
+        features=self.newFactory.musicFiles.mtFeatures
+        likes=self.newFactory.musicFiles.like
+        X1=numpy.zeros((len(trainIndex),len(features[0][:33])))
+        y1=numpy.zeros((len(trainIndex),1))
+        for i,mem in enumerate(trainIndex):
+            X1[i,:]=squeeze(features[mem][:33])
+            if likes[mem]==True:
+                y1[i]=0
+            else:
+                y1[i]=1        
+        
+        Q=2 ## Binary classification
+        kern1=GPy.kern.RBF(Q,ARD=True) + GPy.kern.Bias(Q)
+        kern2 = GPy.kern.RBF(Q,ARD=False) + GPy.kern.Bias(X1.shape[1])
+        
+        
+        m=deepgp.DeepGP([2,2,X1.shape[1]],y1,X_tr=X1,kernels=[kern1,kern2],num_inducing=10,back_constraint=False)
+                     
+        m.optimize(max_iters=1500,messages=True)
+            
+        X2=numpy.zeros((len(testIndex),len(features[0][:33])))
+        for i,mem in enumerate(testIndex):
+            X2[i,:]=squeeze(features[mem][:33])
+        result=m.predict(X2)
+        print(result[0],result[0].shape)
+        for i in range(len(testIndex)):
+            if likes[testIndex[i]]==True:
+                print(i,"0")
+            else:
+                print(i,"1")
         
         
